@@ -4,14 +4,18 @@ import java.io.File;
 import java.io.IOException;
 
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import swervelib.parser.SwerveParser;
+import swervelib.telemetry.SwerveDriveTelemetry;
+import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 import swervelib.SwerveDrive;
 import swervelib.math.SwerveMath;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 
@@ -27,6 +31,9 @@ public class DriveSubsystem extends SubsystemBase {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
+        swerveDrive.setModuleEncoderAutoSynchronize(true, 0.50);
+        swerveDrive.setAutoCenteringModules(false);
     }
 
     /**
@@ -40,12 +47,15 @@ public class DriveSubsystem extends SubsystemBase {
      */
     public Command driveCommand(DoubleSupplier translationX, DoubleSupplier translationY,
             DoubleSupplier angularRotationX) {
-        return run(() -> {
+            SmartDashboard.putString("X: ", "heehee" + MathUtil.applyDeadband(translationX.getAsDouble(),0.2));
+            SmartDashboard.putString("Y: " , "heehee" + MathUtil.applyDeadband(translationY.getAsDouble(),0.2));
+            SmartDashboard.putString("Z: ", "heehee"+    Math.pow(MathUtil.applyDeadband(angularRotationX.getAsDouble(),0.5),3));
+            return run(() -> {
             // Make the robot move
             swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
-                    translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity(),
-                    translationY.getAsDouble() * swerveDrive.getMaximumChassisVelocity()), 0.8),
-                    Math.pow(angularRotationX.getAsDouble(), 3) * swerveDrive.getMaximumChassisAngularVelocity(),
+                    MathUtil.applyDeadband(translationX.getAsDouble(),0.2) * 0,//swerveDrive.getMaximumChassisVelocity(),
+                    MathUtil.applyDeadband(translationY.getAsDouble(),0.2) * swerveDrive.getMaximumChassisVelocity()*0), 0.8),
+                    Math.pow(MathUtil.applyDeadband(angularRotationX.getAsDouble(),0.5),3)*0 * swerveDrive.getMaximumChassisAngularVelocity(),
                     true,
                     false);
         });

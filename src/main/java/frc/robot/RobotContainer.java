@@ -52,7 +52,7 @@ public class RobotContainer {
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     
-    m_swerve.setDefaultCommand(m_swerve.driveCommand(() -> m_driverController.getRawAxis(0), ()-> m_driverController.getRawAxis(1), ()->m_driverController.getRawAxis(2)));
+    m_swerve.setDefaultCommand(m_swerve.driveCommand(() -> -m_driverController.getRawAxis(1), ()-> -m_driverController.getRawAxis(0), ()->-m_driverController.getRawAxis(2)));
     
   }
 
