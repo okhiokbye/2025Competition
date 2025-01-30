@@ -19,10 +19,17 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
+
 public class DriveSubsystem extends SubsystemBase {
     private SwerveDrive swerveDrive;
+    private NetworkTable table;
 
     public DriveSubsystem() {
+        table = NetworkTableInstance.getDefault().getTable("limelight");
         double maximumSpeed = Units.feetToMeters(4.5);
         File swerveJsonDirectory = new File(Filesystem.getDeployDirectory(), "swerve");
         try {
@@ -34,6 +41,23 @@ public class DriveSubsystem extends SubsystemBase {
         SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
         swerveDrive.setModuleEncoderAutoSynchronize(true, 0.50);
         swerveDrive.setAutoCenteringModules(false);
+    }
+    
+    public void periodic() {
+
+        NetworkTableEntry tx = table.getEntry("tx");
+        NetworkTableEntry ty = table.getEntry("ty");
+        NetworkTableEntry ta = table.getEntry("ta");
+
+        //read values periodically
+        double x = tx.getDouble(0.0);
+        double y = ty.getDouble(0.0);
+        double area = ta.getDouble(0.0);
+
+        //post to smart dashboard periodically
+        SmartDashboard.putNumber("LimelightX", x);
+        SmartDashboard.putNumber("LimelightY", y);
+        SmartDashboard.putNumber("LimelightArea", area);
     }
 
     /**
