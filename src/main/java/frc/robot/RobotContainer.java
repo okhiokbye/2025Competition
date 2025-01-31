@@ -9,6 +9,7 @@ import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.CoralOuttakeSubsystem;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -30,9 +31,10 @@ public class RobotContainer {
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandJoystick m_driverController =
-      new CommandJoystick(0);
+  private final CommandJoystick m_driverController = new CommandJoystick(0);
+  private final CommandJoystick m_aimJoystick = new CommandJoystick(1);
   private final DriveSubsystem m_swerve = new DriveSubsystem();
+  private final CoralOuttakeSubsystem m_outtakecoral = new CoralOuttakeSubsystem();
 
   
   public RobotContainer() {
@@ -53,7 +55,8 @@ public class RobotContainer {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     
     m_swerve.setDefaultCommand(m_swerve.driveCommand(() -> -m_driverController.getRawAxis(1), ()-> -m_driverController.getRawAxis(0), ()->-m_driverController.getRawAxis(2)));
-    
+
+    m_aimJoystick.button(1).onTrue(m_outtakecoral.shootCoral().withTimeout(0.2));            
   }
 
   /**
