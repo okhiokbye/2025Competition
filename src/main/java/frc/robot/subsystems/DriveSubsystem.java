@@ -93,7 +93,7 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
     public void configureAutoBuilder(){
-    RobotConfig config;
+    RobotConfig config = null;
     try{
       config = RobotConfig.fromGUISettings();
     } catch (Exception e) {

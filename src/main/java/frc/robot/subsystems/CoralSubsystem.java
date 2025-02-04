@@ -7,8 +7,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import swervelib.parser.SwerveParser;
 import swervelib.SwerveDrive;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
+import edu.wpi.first.wpilibj2.command.Commands.*;
 import java.util.function.DoubleSupplier;
 
 import com.revrobotics.spark.SparkMax;
@@ -29,7 +31,7 @@ public class CoralSubsystem extends SubsystemBase {
     }
 
     public Command shootCoral() {
-        return this.startEndCommand(
+        return new StartEndCommand(
             //set motor power manually below
             () -> m_outtakecoral.set(-1),
             () -> m_outtakecoral.set(0)
@@ -38,9 +40,9 @@ public class CoralSubsystem extends SubsystemBase {
 
     public Command shootMagicBoxLow() {
     //set rotation limit in # of rotations below
-        m_magicBox.setSoftLimit(SoftLimitDirection.kForward, 0.25);
-        m_magicBox.enableSoftLimit(SoftLimitDirection.kForward, true);
-        return this.startEndCommand(
+      //  m_magicBox.setSoftLimit(SoftLimitDirection.kForward, 0.25);
+      //  m_magicBox.enableSoftLimit(SoftLimitDirection.kForward, true);
+        return new StartEndCommand(
             () -> m_magicBox.set(1),
             () -> m_magicBox.set(0)
         );
@@ -48,9 +50,9 @@ public class CoralSubsystem extends SubsystemBase {
 
     public Command shootMagicBoxHigh() {
     //set rotation limit in # of rotations below
-        m_magicBox.setSoftLimit(SoftLimitDirection.kForward, 0.25);
-        m_magicBox.enableSoftLimit(SoftLimitDirection.kForward, true);
-        return this.startEndCommand(
+       // m_magicBox.setSoftLimit(SoftLimitDirection.kForward, 0.25);
+       // m_magicBox.enableSoftLimit(SoftLimitDirection.kForward, true);
+        return new StartEndCommand(
             () -> m_magicBox.set(1),
             () -> m_magicBox.set(0)
         );
@@ -58,8 +60,8 @@ public class CoralSubsystem extends SubsystemBase {
 
     public void periodic() {
         // This method will be called once per scheduler run
-        m_magicBox.setSoftLimit(SoftLimitDirection.kReverse, 0);
-        m_magicBox.enableSoftLimit(SoftLimitDirection.kReverse, true);
+     //   m_magicBox.setSoftLimit(SoftLimitDirection.kReverse, 0);
+      //  m_magicBox.enableSoftLimit(SoftLimitDirection.kReverse, true);
         m_magicBox.set(-1);
     }    
 
