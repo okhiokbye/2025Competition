@@ -108,39 +108,46 @@ public class DriveSubsystem extends SubsystemBase {
             this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
             this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
             (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
-            new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-                    new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
-                    new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
-            ),
-            config, // The robot configuration
-            () -> {
-              // Boolean supplier that controls when the path will be mirrored for the red alliance
-              // This will flip the path being followed to the red side of the field.
-              // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-
-              var alliance = DriverStation.getAlliance();
-              if (alliance.isPresent()) {
-                return alliance.get() == DriverStation.Alliance.Red;
+                        new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
+                                new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
+                                new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
+                        ),
+                        config, // The robot configuration
+                        () -> {
+                          // Boolean supplier that controls when the path will be mirrored for the red alliance
+                          // This will flip the path being followed to the red side of the field.
+                          // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+            
+                          var alliance = DriverStation.getAlliance();
+                          if (alliance.isPresent()) {
+                            return alliance.get() == DriverStation.Alliance.Red;
+                          }
+                          return false;
+                        },
+                        this // Reference to this subsystem to set requirements
+                );
               }
-              return false;
-            },
-            this // Reference to this subsystem to set requirements
-    );
-  }
-    
-    public Command driveCommand(DoubleSupplier translationX, DoubleSupplier translationY,
-            DoubleSupplier angularRotationX) {
-            SmartDashboard.putString("X: ", "heehee" + MathUtil.applyDeadband(translationX.getAsDouble(),0.2));
-            SmartDashboard.putString("Y: " , "heehee" + MathUtil.applyDeadband(translationY.getAsDouble(),0.2));
-            SmartDashboard.putString("Z: ", "heehee"+    Math.pow(MathUtil.applyDeadband(angularRotationX.getAsDouble(),0.5),3));
-            return run(() -> {
-            // Make the robot move
-            swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
-                    MathUtil.applyDeadband(translationX.getAsDouble(),0.2) * 0,//swerveDrive.getMaximumChassisVelocity(),
-                    MathUtil.applyDeadband(translationY.getAsDouble(),0.2) * swerveDrive.getMaximumChassisVelocity()*0), 0.8),
-                    Math.pow(MathUtil.applyDeadband(angularRotationX.getAsDouble(),0.5),3)*0 * swerveDrive.getMaximumChassisAngularVelocity(),
-                    true,
-                    false);
-        });
+
+  private void driveRobotRelative(ChassisSpeeds speeds) {
+     // TODO Auto-generated method stub)
+     swerveDrive.drive(speeds);
+              }
+
+    public Command driveCommand(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX) {
+      SmartDashboard.putString("X: ", "heehee" + MathUtil.applyDeadband(translationX.getAsDouble(), 0.2));
+      SmartDashboard.putString("Y: ", "heehee" + MathUtil.applyDeadband(translationY.getAsDouble(), 0.2));
+      SmartDashboard.putString("Z: ","heehee" + Math.pow(MathUtil.applyDeadband(angularRotationX.getAsDouble(), 0.5), 3));
+      return run(() -> {
+        // Make the robot move
+        swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
+            MathUtil.applyDeadband(translationX.getAsDouble(), 0.2) * 0, // swerveDrive.getMaximumChassisVelocity(),
+            MathUtil.applyDeadband(translationY.getAsDouble(), 0.2) * swerveDrive.getMaximumChassisVelocity()
+                * 0),
+            0.8),
+            Math.pow(MathUtil.applyDeadband(angularRotationX.getAsDouble(), 0.5), 3) * 0
+                * swerveDrive.getMaximumChassisAngularVelocity(),
+            true,
+            false);
+      });
     }
 }
