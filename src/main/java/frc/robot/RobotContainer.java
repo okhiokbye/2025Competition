@@ -9,7 +9,7 @@ import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
-import frc.robot.subsystems.CoralOuttakeSubsystem;
+import frc.robot.subsystems.CoralSubsystem;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -34,7 +34,7 @@ public class RobotContainer {
   private final CommandJoystick m_driverController = new CommandJoystick(0);
   private final CommandJoystick m_aimJoystick = new CommandJoystick(1);
   private final DriveSubsystem m_swerve = new DriveSubsystem();
-  private final CoralOuttakeSubsystem m_outtakecoral = new CoralOuttakeSubsystem();
+  private final CoralSubsystem m_outtakecoral = new CoralSubsystem();
 
   
   public RobotContainer() {
