@@ -47,7 +47,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     public DriveSubsystem() {
         table = NetworkTableInstance.getDefault().getTable("limelight");
-        double maximumSpeed = Units.feetToMeters(4.5);
+        double maximumSpeed = Units.feetToMeters(15.5);
         File swerveJsonDirectory = new File(Filesystem.getDeployDirectory(), "swerve");
         try {
             swerveDrive = new SwerveParser(swerveJsonDirectory).createSwerveDrive(maximumSpeed);
@@ -58,6 +58,8 @@ public class DriveSubsystem extends SubsystemBase {
         SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
         swerveDrive.setModuleEncoderAutoSynchronize(true, 0.50);
         swerveDrive.setAutoCenteringModules(false);
+        swerveDrive.zeroGyro();
+        
     }
     
     
@@ -93,7 +95,7 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
     public void configureAutoBuilder(){
-    RobotConfig config = null;
+    RobotConfig config;
     try{
       config = RobotConfig.fromGUISettings();
     } catch (Exception e) {
@@ -109,8 +111,8 @@ public class DriveSubsystem extends SubsystemBase {
             this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
             (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
                         new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-                                new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
-                                new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
+                                new PIDConstants(0.121, 0.0001, 0.01), // Translation PID constants
+                                new PIDConstants(0.008, 0.0, 0.0064) // Rotation PID constants
                         ),
                         config, // The robot configuration
                         () -> {
@@ -140,11 +142,11 @@ public class DriveSubsystem extends SubsystemBase {
       return run(() -> {
         // Make the robot move
         swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
-            MathUtil.applyDeadband(translationX.getAsDouble(), 0.2) * 0, // swerveDrive.getMaximumChassisVelocity(),
+            MathUtil.applyDeadband(translationX.getAsDouble(), 0.2)* swerveDrive.getMaximumChassisVelocity(),
             MathUtil.applyDeadband(translationY.getAsDouble(), 0.2) * swerveDrive.getMaximumChassisVelocity()
-                * 0),
+                ),
             0.8),
-            Math.pow(MathUtil.applyDeadband(angularRotationX.getAsDouble(), 0.5), 3) * 0
+            Math.pow(MathUtil.applyDeadband(angularRotationX.getAsDouble(), 0.5), 3) 
                 * swerveDrive.getMaximumChassisAngularVelocity(),
             true,
             false);

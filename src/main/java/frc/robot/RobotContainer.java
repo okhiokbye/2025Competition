@@ -19,6 +19,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import java.io.File;
 import java.util.function.Supplier;
 
+import com.pathplanner.lib.commands.PathPlannerAuto;
+
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
@@ -53,8 +55,8 @@ public class RobotContainer {
    */
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    
-    m_swerve.setDefaultCommand(m_swerve.driveCommand(() -> -m_driverController.getRawAxis(1), ()-> -m_driverController.getRawAxis(0), ()->-m_driverController.getRawAxis(2)));
+    m_swerve.configureAutoBuilder();
+    m_swerve.setDefaultCommand(m_swerve.driveCommand(() -> -m_driverController.getRawAxis(1), ()-> -m_driverController.getRawAxis(0), ()->m_driverController.getRawAxis(2)));
 
     m_aimJoystick.button(1).onTrue(m_outtakecoral.shootCoral().withTimeout(0.2));            
   }
@@ -66,6 +68,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return Autos.exampleAuto(m_exampleSubsystem);
+    return new PathPlannerAuto("Example Path");
   }
 }
