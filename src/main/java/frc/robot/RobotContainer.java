@@ -36,7 +36,7 @@ public class RobotContainer {
   private final CommandJoystick m_driverController = new CommandJoystick(0);
   private final CommandJoystick m_aimJoystick = new CommandJoystick(1);
   private final DriveSubsystem m_swerve = new DriveSubsystem();
-  private final CoralSubsystem m_outtakecoral = new CoralSubsystem();
+  // private final CoralSubsystem m_outtakecoral = new CoralSubsystem();
 
   
   public RobotContainer() {
@@ -58,7 +58,7 @@ public class RobotContainer {
     m_swerve.configureAutoBuilder();
     m_swerve.setDefaultCommand(m_swerve.driveCommand(() -> -m_driverController.getRawAxis(1), ()-> -m_driverController.getRawAxis(0), ()->m_driverController.getRawAxis(2)));
 
-    m_aimJoystick.button(1).onTrue(m_outtakecoral.shootCoral().withTimeout(0.2));            
+   // m_aimJoystick.button(1).onTrue(m_outtakecoral.shootCoral().withTimeout(0.2));            
   }
 
   /**
