@@ -40,12 +40,12 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
-public class DriveSubsystem extends SubsystemBase {
+public class DriveLewis extends SubsystemBase {
     private SwerveDrive swerveDrive;
     private NetworkTable table;
 
 
-    public DriveSubsystem() {
+    public DriveLewis() {
         table = NetworkTableInstance.getDefault().getTable("limelight");
         double maximumSpeed = Units.feetToMeters(4.5);
         File swerveJsonDirectory = new File(Filesystem.getDeployDirectory(), "swerve");
