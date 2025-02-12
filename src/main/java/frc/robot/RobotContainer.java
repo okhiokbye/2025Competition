@@ -35,8 +35,8 @@ public class RobotContainer {
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandJoystick m_driverController = new CommandJoystick(0);
   private final CommandJoystick m_aimJoystick = new CommandJoystick(1);
-  private final DriveSubsystem m_swerve = new DriveSubsystem();
-  // private final CoralSubsystem m_outtakecoral = new CoralSubsystem();
+ // private final DriveSubsystem m_swerve = new DriveSubsystem();
+   private final CoralSubsystem m_outtakecoral = new CoralSubsystem();
 
   
   public RobotContainer() {
@@ -55,9 +55,9 @@ public class RobotContainer {
    */
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    m_swerve.configureAutoBuilder();
-    m_swerve.setDefaultCommand(m_swerve.driveCommand(() -> -m_driverController.getRawAxis(1), ()-> -m_driverController.getRawAxis(0), ()->m_driverController.getRawAxis(2)));
-
+    // m_swerve.configureAutoBuilder();
+    // m_swerve.setDefaultCommand(m_swerve.driveCommand(() -> -m_driverController.getRawAxis(1), ()-> -m_driverController.getRawAxis(0), ()->m_driverController.getRawAxis(2)));
+      m_aimJoystick.button(2).onTrue(m_outtakecoral.runIntake().withTimeout(1));
    // m_aimJoystick.button(1).onTrue(m_outtakecoral.shootCoral().withTimeout(0.2));            
   }
 
@@ -68,6 +68,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return new PathPlannerAuto("Example Path");
+    return new PathPlannerAuto("New Auto");
   }
 }

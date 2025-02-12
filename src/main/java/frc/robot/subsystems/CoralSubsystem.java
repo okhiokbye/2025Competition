@@ -9,6 +9,7 @@ import swervelib.SwerveDrive;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.Commands.*;
 import java.util.function.DoubleSupplier;
@@ -24,11 +25,14 @@ import edu.wpi.first.math.util.Units;
 public class CoralSubsystem extends SubsystemBase {
     private final SparkMax m_outtakecoral;
     private final SparkMax m_magicBox;
+    private final SparkMax m_intake;
     
     public CoralSubsystem() {
         m_outtakecoral = new SparkMax(13, MotorType.kBrushless);
         m_magicBox = new SparkMax(14, MotorType.kBrushless);
+        m_intake = new SparkMax(31, MotorType.kBrushless);
     }
+
 
     public Command shootCoral() {
         return new StartEndCommand(
@@ -56,6 +60,12 @@ public class CoralSubsystem extends SubsystemBase {
             () -> m_magicBox.set(1),
             () -> m_magicBox.set(0)
         );
+    }
+    public Command runIntake(){
+        return new StartEndCommand(
+        ()-> m_intake.set(.1),
+        ()->m_intake.set(0),
+        this );
     }
 
     public void periodic() {
