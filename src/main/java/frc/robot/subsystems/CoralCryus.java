@@ -17,20 +17,25 @@ import java.util.function.DoubleSupplier;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkClosedLoopController;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 
-public class CoralSubsystem extends SubsystemBase {
+public class CoralCryus extends SubsystemBase {
     private final SparkMax m_outtakecoral;
     private final SparkMax m_magicBox;
     private final SparkMax m_intake;
     
-    public CoralSubsystem() {
+    private final RelativeEncoder m_encoder;
+    private final PIDController m_magicBoxController = new PIDController(0 , 0 , 0);
+    
+    public CoralCryus() {
         m_outtakecoral = new SparkMax(13, MotorType.kBrushless);
         m_magicBox = new SparkMax(14, MotorType.kBrushless);
-        m_intake = new SparkMax(31, MotorType.kBrushless);
+        m_encoder = m_magicBox.getEncoder();
     }
 
 
@@ -43,36 +48,21 @@ public class CoralSubsystem extends SubsystemBase {
     }
 
     public Command shootMagicBoxLow() {
-    //set rotation limit in # of rotations below
-      //  m_magicBox.setSoftLimit(SoftLimitDirection.kForward, 0.25);
-      //  m_magicBox.enableSoftLimit(SoftLimitDirection.kForward, true);
-        return new StartEndCommand(
-            () -> m_magicBox.set(1),
-            () -> m_magicBox.set(0)
-        );
+    double posLow = m_encoder.getPosition();    
+    double magicBoxAngle = m_magicBoxController.calculate(posLow, 0.1042);
+        return new RunCommand(() -> m_magicBox.set(magicBoxAngle));
+    }
+    
+    public Command shootMagicBoxHigh() {
+    double posLow = m_encoder.getPosition();    
+    double magicBoxAngle = m_magicBoxController.calculate(posLow, 0.25);
+        return new RunCommand(() -> m_magicBox.set(magicBoxAngle));
     }
 
-    public Command shootMagicBoxHigh() {
-    //set rotation limit in # of rotations below
-       // m_magicBox.setSoftLimit(SoftLimitDirection.kForward, 0.25);
-       // m_magicBox.enableSoftLimit(SoftLimitDirection.kForward, true);
-        return new StartEndCommand(
-            () -> m_magicBox.set(1),
-            () -> m_magicBox.set(0)
-        );
-    }
-    public Command runIntake(){
-        return new StartEndCommand(
-        ()-> m_intake.set(.1),
-        ()->m_intake.set(0),
-        this );
-    }
 
     public void periodic() {
         // This method will be called once per scheduler run
-     //   m_magicBox.setSoftLimit(SoftLimitDirection.kReverse, 0);
-      //  m_magicBox.enableSoftLimit(SoftLimitDirection.kReverse, true);
-        m_magicBox.set(-1);
+
     }    
 
 }   
