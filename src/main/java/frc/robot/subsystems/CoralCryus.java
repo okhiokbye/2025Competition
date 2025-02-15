@@ -57,10 +57,9 @@ public class CoralCryus extends SubsystemBase {
         return new RunCommand(() -> m_magicBox.set(magicBoxAngle));
     }
 
-
     public void periodic() {
         // This method will be called once per scheduler run
-
+                
     }    
 
 }   
