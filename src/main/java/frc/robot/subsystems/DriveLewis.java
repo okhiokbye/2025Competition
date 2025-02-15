@@ -1,48 +1,45 @@
 package frc.robot.subsystems;
 
-import java.util.*;
 import java.io.File;
 import java.io.IOException;
-
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import swervelib.parser.SwerveParser;
-import swervelib.telemetry.SwerveDriveTelemetry;
-import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
-import swervelib.SwerveDrive;
-import swervelib.math.SwerveMath;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
+import java.util.Map;
 import java.util.function.DoubleSupplier;
 
-import com.ctre.phoenix6.swerve.SwerveModule;
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathPlannerAuto;
-import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import com.pathplanner.lib.path.PathConstraints;
-import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.util.DriveFeedforwards;
-import com.pathplanner.lib.util.swerve.SwerveSetpoint;
-import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
+
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.util.Units;
-
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.networktables.DoubleTopic;
 import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.LimelightHelpers;
+import swervelib.SwerveDrive;
+import swervelib.math.SwerveMath;
+import swervelib.parser.SwerveParser;
+import swervelib.telemetry.SwerveDriveTelemetry;
+import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 public class DriveLewis extends SubsystemBase {
     private SwerveDrive swerveDrive;
     private NetworkTable table;
+    private SwerveDrivePoseEstimator poseEstimator;
+    private boolean doRejectUpdate = false;
 
 
     public DriveLewis() {
@@ -60,26 +57,81 @@ public class DriveLewis extends SubsystemBase {
         swerveDrive.setAutoCenteringModules(false);
         swerveDrive.zeroGyro();
         
+
+        poseEstimator = new SwerveDrivePoseEstimator(
+          swerveDrive.kinematics,
+          swerveDrive.getYaw(),
+          swerveDrive.getModulePositions(),
+          new Pose2d(0, 0, new Rotation2d(0)),
+          VecBuilder.fill(0.7, 0.7, 9999999),// idk what to do here
+          VecBuilder.fill(0.7, 0.7, 9999999)
+        );
     }
-    
+
+    private double Yawo = 0;
+    private double yawVelo = 0;
     
     public void periodic() {
 
-        NetworkTableEntry tx = table.getEntry("tx");
-        NetworkTableEntry ty = table.getEntry("ty");
-        NetworkTableEntry ta = table.getEntry("ta");
+        // NetworkTableEntry tx = table.getEntry("tx");
+        // NetworkTableEntry ty = table.getEntry("ty");
+        // NetworkTableEntry ta = table.getEntry("ta");
 
-        //read values periodically
-        double x = tx.getDouble(0.0);
-        double y = ty.getDouble(0.0);
-        double area = ta.getDouble(0.0);
+        // //read values periodically
+        // double x = tx.getDouble(0.0);
+        // double y = ty.getDouble(0.0);
+        // double area = ta.getDouble(0.0); // WHAT % (0-100) OF APRIL TAG IT READS 
 
-        //post to smart dashboard periodically
-        SmartDashboard.putNumber("LimelightX", x);
-        SmartDashboard.putNumber("LimelightY", y);
-        SmartDashboard.putNumber("LimelightArea", area);
+        // //post to smart dashboard periodically
+        // SmartDashboard.putNumber("LimelightX", x);
+        // SmartDashboard.putNumber("LimelightY", y);
+        // SmartDashboard.putNumber("LimelightArea", area);
+
+        
+        poseEstimator.update(swerveDrive.getYaw(), getModulePositions());
+        LimelightHelpers.SetRobotOrientation("limelight", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+        LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
+
+        double Yawcurr = swerveDrive.getYaw().getDegrees();
+        double changet = .02;
+
+        yawVelo = (Yawcurr - Yawo) / changet;
+        Yawo = Yawcurr;
+
+
+        if (Math.abs(yawVelo) > 720) { // 720 degrees per second
+            doRejectUpdate = true;
+        }
+        if (mt2.tagCount == 0) {
+            doRejectUpdate = true;
+        }
+
+        // Add vision measurement to pose estimator
+        if (!doRejectUpdate) {
+            poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.5, .5, 9999999));
+            poseEstimator.addVisionMeasurement(mt2.pose, mt2.timestampSeconds);
+        }
+
+        Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
+        SmartDashboard.putNumber("est x", estimatedPose.getX());
+        SmartDashboard.putNumber("est y", estimatedPose.getY());
+        SmartDashboard.putNumber("est angle", estimatedPose.getRotation().getDegrees());
+
+
+        double[] poseArray = new double[] {
+          estimatedPose.getX(),
+          estimatedPose.getY(),
+          estimatedPose.getRotation().getDegrees()
+        };
+
+        NetworkTableInstance.getDefault().getTable("AdvantageScope").getEntry("rohotpose").setDoubleArray(poseArray);
+
+
+
   }
 
+  
+  
     public Pose2d getPose() {
      return swerveDrive.getPose();
     }
@@ -89,10 +141,15 @@ public class DriveLewis extends SubsystemBase {
     swerveDrive.resetOdometry(initialHolonomicPose);
   }
 
-  public ChassisSpeeds getRobotRelativeSpeeds(){
-    Map<String, swervelib.SwerveModule> mapvelo = swerveDrive.getModuleMap();
-    return swerveDrive.kinematics.toChassisSpeeds(mapvelo.get("backright").getState(), mapvelo.get("frontleft").getState(), mapvelo.get("frontright").getState(), mapvelo.get("backleft").getState());
-  }
+  public SwerveModulePosition[] getModulePositions() {
+    Map<String, swervelib.SwerveModule> modules = swerveDrive.getModuleMap();
+    return new SwerveModulePosition[] {
+        modules.get("frontleft").getPosition(),  // Replace with actual module names
+        modules.get("frontright").getPosition(),
+        modules.get("backleft").getPosition(),
+        modules.get("backright").getPosition()
+    };
+}
 
     public void configureAutoBuilder(){
     RobotConfig config = null;
@@ -108,7 +165,7 @@ public class DriveLewis extends SubsystemBase {
     AutoBuilder.configure(
             this::getPose, // Robot pose supplier
             this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
-            this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+            this::getModulePositions, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
             (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
                         new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
                                 new PIDConstants(0.121, 0.0001, 0.01), // Translation PID constants
