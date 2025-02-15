@@ -27,7 +27,6 @@ import edu.wpi.first.math.util.Units;
 public class CoralCryus extends SubsystemBase {
     private final SparkMax m_outtakecoral;
     private final SparkMax m_magicBox;
-    private final SparkMax m_intake;
     
     private final RelativeEncoder m_encoder;
     private final PIDController m_magicBoxController = new PIDController(0 , 0 , 0);

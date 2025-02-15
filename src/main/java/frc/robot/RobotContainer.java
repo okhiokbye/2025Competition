@@ -44,6 +44,7 @@ public class RobotContainer {
   public RobotContainer() {
     // Configure the trigger bindings
     configureBindings();
+    m_swerve.configureAutoBuilder();
   }
 
   /**
@@ -58,7 +59,11 @@ public class RobotContainer {
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     
-    m_swerve.setDefaultCommand(m_swerve.driveCommand(() -> -m_driverController.getRawAxis(1), ()-> -m_driverController.getRawAxis(0), ()->-m_driverController.getRawAxis(2)));
+    m_swerve.setDefaultCommand(m_swerve.driveCommand(
+      () -> -m_driverController.getRawAxis(1), 
+      ()-> -m_driverController.getRawAxis(0), 
+      ()->-m_driverController.getRawAxis(2)
+    ));
 
     m_aimJoystick.button(1).onTrue(m_outtakecoral.shootCoral().withTimeout(0.2));
     m_aimJoystick.button(2).onTrue(m_outtakecoral.shootMagicBoxLow());

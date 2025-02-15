@@ -19,7 +19,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.networktables.DoubleTopic;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -33,8 +32,6 @@ import swervelib.math.SwerveMath;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
-
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 public class DriveLewis extends SubsystemBase {
     private SwerveDrive swerveDrive;
     private NetworkTable table;
@@ -144,12 +141,22 @@ public class DriveLewis extends SubsystemBase {
   public SwerveModulePosition[] getModulePositions() {
     Map<String, swervelib.SwerveModule> modules = swerveDrive.getModuleMap();
     return new SwerveModulePosition[] {
-        modules.get("frontleft").getPosition(),  // Replace with actual module names
+        modules.get("frontleft").getPosition(),
         modules.get("frontright").getPosition(),
         modules.get("backleft").getPosition(),
         modules.get("backright").getPosition()
     };
-}
+  }
+
+    public ChassisSpeeds getChassisSpeeds(){
+      Map<String, swervelib.SwerveModule> mapvelo = swerveDrive.getModuleMap();
+      return swerveDrive.kinematics.toChassisSpeeds(
+        mapvelo.get("backright").getState(), 
+        mapvelo.get("frontleft").getState(), 
+        mapvelo.get("frontright").getState(), 
+        mapvelo.get("backleft").getState());
+  }
+
 
     public void configureAutoBuilder(){
     RobotConfig config = null;
@@ -165,7 +172,7 @@ public class DriveLewis extends SubsystemBase {
     AutoBuilder.configure(
             this::getPose, // Robot pose supplier
             this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
-            this::getModulePositions, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+            this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
             (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
                         new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
                                 new PIDConstants(0.121, 0.0001, 0.01), // Translation PID constants
