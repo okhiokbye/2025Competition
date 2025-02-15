@@ -11,6 +11,8 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -18,11 +20,14 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -53,16 +58,11 @@ public class DriveLewis extends SubsystemBase {
         swerveDrive.setModuleEncoderAutoSynchronize(true, 0.50);
         swerveDrive.setAutoCenteringModules(false);
         swerveDrive.zeroGyro();
-        
+        Matrix stdDevs = new Matrix<N3,N1>(Nat.N3(), Nat.N1(), new double[] {0.7, 0.7, 9999999});
+        swerveDrive.setVisionMeasurementStdDevs(stdDevs);
+        poseEstimator = swerveDrive.swerveDrivePoseEstimator;
 
-        poseEstimator = new SwerveDrivePoseEstimator(
-          swerveDrive.kinematics,
-          swerveDrive.getYaw(),
-          swerveDrive.getModulePositions(),
-          new Pose2d(0, 0, new Rotation2d(0)),
-          VecBuilder.fill(0.7, 0.7, 9999999),// idk what to do here
-          VecBuilder.fill(0.7, 0.7, 9999999)
-        );
+   
     }
 
     private double Yawo = 0;
@@ -109,19 +109,22 @@ public class DriveLewis extends SubsystemBase {
             poseEstimator.addVisionMeasurement(mt2.pose, mt2.timestampSeconds);
         }
 
-        Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
-        SmartDashboard.putNumber("est x", estimatedPose.getX());
-        SmartDashboard.putNumber("est y", estimatedPose.getY());
-        SmartDashboard.putNumber("est angle", estimatedPose.getRotation().getDegrees());
+        swerveDrive.addVisionMeasurement(mt2.pose,mt2.timestampSeconds);
+          
+        
+        // Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
+        // SmartDashboard.putNumber("est x", estimatedPose.getX());
+        // SmartDashboard.putNumber("est y", estimatedPose.getY());
+        // SmartDashboard.putNumber("est angle", estimatedPose.getRotation().getDegrees());
 
 
-        double[] poseArray = new double[] {
-          estimatedPose.getX(),
-          estimatedPose.getY(),
-          estimatedPose.getRotation().getDegrees()
-        };
+        // double[] poseArray = new double[] {
+        //   estimatedPose.getX(),
+        //   estimatedPose.getY(),
+        //   estimatedPose.getRotation().getDegrees()
+        // };
 
-        NetworkTableInstance.getDefault().getTable("AdvantageScope").getEntry("rohotpose").setDoubleArray(poseArray);
+        // NetworkTableInstance.getDefault().getTable("AdvantageScope").getEntry("rohotpose").setDoubleArray(poseArray);
 
 
 
