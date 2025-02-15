@@ -8,6 +8,7 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.DriveLewis;
+import frc.robot.subsystems.ElevatorJustin;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.CoralCryus;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -37,6 +38,7 @@ public class RobotContainer {
   private final CommandJoystick m_aimJoystick = new CommandJoystick(1);
   private final DriveLewis m_swerve = new DriveLewis();
   private final CoralCryus m_outtakecoral = new CoralCryus();
+  private final ElevatorJustin m_elevator = new ElevatorJustin();
 
   
   public RobotContainer() {
@@ -61,6 +63,11 @@ public class RobotContainer {
     m_aimJoystick.button(1).onTrue(m_outtakecoral.shootCoral().withTimeout(0.2));
     m_aimJoystick.button(2).onTrue(m_outtakecoral.shootMagicBoxLow());
     m_aimJoystick.button(3).onTrue(m_outtakecoral.shootMagicBoxHigh());
+    
+    m_aimJoystick.button(4).onTrue(m_elevator.elevate(1));
+    m_aimJoystick.button(5).onTrue(m_elevator.elevate(2));
+    m_aimJoystick.button(6).onTrue(m_elevator.elevate(3));
+    m_aimJoystick.button(7).onTrue(m_elevator.elevate(4));
     
   }
 
