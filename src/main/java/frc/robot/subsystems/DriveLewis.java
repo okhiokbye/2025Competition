@@ -72,14 +72,14 @@ public class DriveLewis extends SubsystemBase {
 
 
     StructPublisher<Pose3d> publisher = NetworkTableInstance.getDefault()
-    .getStructTopic("MyPose", Pose3d.struct).publish();
+    .getStructTopic("lewissucksihatehimandwanthimtodie", Pose3d.struct).publish();
     
 
 
     
     public void periodic() {
 
-        double[] botpose = table.getEntry("botpose").getDoubleArray(new double[6]);
+        double[] botpose = table.getEntry("botpose_wpiblue").getDoubleArray(new double[6]);
         double x = botpose[0];
         double y = botpose[1];
         double yaw = botpose[5];
