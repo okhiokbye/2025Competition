@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.function.DoubleSupplier;
 
@@ -25,6 +26,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -66,9 +68,13 @@ public class DriveLewis extends SubsystemBase {
 
     private double Yawo = 0;
     private double yawVelo = 0;
-    
+
+
+
     StructPublisher<Pose3d> publisher = NetworkTableInstance.getDefault()
-    .getStructTopic("newrobotpose", Pose3d.struct).publish();
+    .getStructTopic("MyPose", Pose3d.struct).publish();
+    
+
 
     
     public void periodic() {
@@ -76,20 +82,26 @@ public class DriveLewis extends SubsystemBase {
         double[] botpose = table.getEntry("botpose").getDoubleArray(new double[6]);
         double x = botpose[0];
         double y = botpose[1];
-        double yaw = Math.toDegrees(botpose[5]);
+        double yaw = botpose[5];
 
         Pose3d robotPose = new Pose3d(
           x, y, 0,
           new Rotation3d(0, 0, yaw)
         );
 
+        // publisher.set(robotPose);
+        // NetworkTableInstance.getDefault().getTable("AdvantageScope").getEntry("rohotpose").setDoubleArray(robotPose);
+
         publisher.set(robotPose);
+
+
 
 
 
         SmartDashboard.putNumber("lime x", x);
         SmartDashboard.putNumber("schlime y", y);
         SmartDashboard.putNumber("lime yaw", Math.toDegrees(yaw));
+        SmartDashboard.putString("Botpose Array", Arrays.toString(botpose));
         
 
 
