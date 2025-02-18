@@ -71,21 +71,24 @@ public class DriveLewis extends SubsystemBase {
 
 
 
-    StructPublisher<Pose3d> publisher = NetworkTableInstance.getDefault()
-    .getStructTopic("lewissucksihatehimandwanthimtodie", Pose3d.struct).publish();
+    StructPublisher<Pose3d> publisher = NetworkTableInstance.getDefault().getStructTopic("lewissucksihatehimandwanthimtodie", Pose3d.struct).publish();
     
 
 
     
     public void periodic() {
 
-        double[] botpose = table.getEntry("botpose_wpiblue").getDoubleArray(new double[6]);
-        double x = botpose[0];
-        double y = botpose[1];
-        double yaw = botpose[5];
+        double[] botpose = table.getEntry("targetpose_cameraspace").getDoubleArray(new double[6]);
+        double tx = botpose[0];
+        double ty = botpose[1];
+        double tz = botpose[2];
+        double pitch = botpose[3];
+        double yaw = botpose[4];
+        double roll = botpose[5];
+        
 
         Pose3d robotPose = new Pose3d(
-          x, y, 0,
+          tx, ty, 0,
           new Rotation3d(0, 0, yaw)
         );
 
@@ -98,8 +101,8 @@ public class DriveLewis extends SubsystemBase {
 
 
 
-        SmartDashboard.putNumber("lime x", x);
-        SmartDashboard.putNumber("schlime y", y);
+        SmartDashboard.putNumber("lime x", tx);
+        SmartDashboard.putNumber("schlime y", ty);
         SmartDashboard.putNumber("lime yaw", Math.toDegrees(yaw));
         SmartDashboard.putString("Botpose Array", Arrays.toString(botpose));
         
@@ -162,6 +165,10 @@ public class DriveLewis extends SubsystemBase {
 
 
   }
+
+    private boolean hasTarget() {
+      return LimelightHelpers.getTV("");
+    }
 
   
   
