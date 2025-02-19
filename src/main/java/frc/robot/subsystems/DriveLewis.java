@@ -34,6 +34,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
+import frc.robot.LimelightHelpers.LimelightResults;
 import swervelib.SwerveDrive;
 import swervelib.math.SwerveMath;
 import swervelib.parser.SwerveParser;
@@ -63,7 +64,7 @@ public class DriveLewis extends SubsystemBase {
         
         poseEstimator = swerveDrive.swerveDrivePoseEstimator;
 
-   
+          
     }
 
     private double Yawo = 0;
@@ -77,21 +78,27 @@ public class DriveLewis extends SubsystemBase {
 
     
     public void periodic() {
-
-        double[] botpose = table.getEntry("targetpose_cameraspace").getDoubleArray(new double[6]);
-        double tx = botpose[0];
-        double ty = botpose[1];
-        double tz = botpose[2];
-        double pitch = botpose[3];
-        double yaw = botpose[4];
-        double roll = botpose[5];
+        double[] deft = {1.0,1.0,1.0,1.0,1.0,1.0};
+        LimelightHelpers.PoseEstimate botposeMT2 = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
+        double[] botpose = NetworkTableInstance.getDefault().getTable("limelight").getEntry("botpose").getDoubleArray(deft);
+     // LimelightHelpers.LimelightResults.getBotPose3d_wpiBlue();
+        
+        // double tx = botposeMT2[0];
+        // double ty = botposeMT2[1];
+        // double tz = botposeMT2[2];
+         double roll = botpose[3];
+         double pitch = botpose[4];
+         double yaw = botpose[5];
         
 
-        Pose3d robotPose = new Pose3d(
-          tx, ty, 0,
-          new Rotation3d(0, 0, yaw)
-        );
-
+        // Pose3d robotPose = new Pose3d(
+        //   tx, ty, tz,
+        //   new Rotation3d(roll, pitch, yaw)
+        // );
+         
+        poseEstimator.update(swerveDrive.getYaw(), getModulePositions());
+        LimelightHelpers.SetRobotOrientation("limelight", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+        Pose3d robotPose = new Pose3d(botposeMT2.pose.getX(), botposeMT2.pose.getY(),0, new Rotation3d(roll, pitch, yaw));
         // publisher.set(robotPose);
         // NetworkTableInstance.getDefault().getTable("AdvantageScope").getEntry("rohotpose").setDoubleArray(robotPose);
 
@@ -101,10 +108,10 @@ public class DriveLewis extends SubsystemBase {
 
 
 
-        SmartDashboard.putNumber("lime x", tx);
-        SmartDashboard.putNumber("schlime y", ty);
-        SmartDashboard.putNumber("lime yaw", Math.toDegrees(yaw));
-        SmartDashboard.putString("Botpose Array", Arrays.toString(botpose));
+        // SmartDashboard.putNumber("lime x", tx);
+        // SmartDashboard.putNumber("schlime y", ty);
+        // SmartDashboard.putNumber("lime yaw", Math.toDegrees(yaw));
+        // SmartDashboard.putString("Botpose Array", Arrays.toString(botpose));
         
 
 
