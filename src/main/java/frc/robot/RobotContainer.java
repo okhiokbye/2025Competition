@@ -65,7 +65,8 @@ public class RobotContainer {
       ()->-m_driverController.getRawAxis(2)
     ));
 
-    m_aimJoystick.button(1).onTrue(m_outtakecoral.shootCoral().withTimeout(0.2));
+    // m_aimJoystick.button(1).onTrue(m_outtakecoral.shootCoral().withTimeout(0.2));
+    m_aimJoystick.button(1).onTrue(m_outtakecoral.intake().withTimeout(0.2));
     m_aimJoystick.button(2).onTrue(m_outtakecoral.shootMagicBoxLow());
     m_aimJoystick.button(3).onTrue(m_outtakecoral.shootMagicBoxHigh());
     

@@ -27,7 +27,7 @@ import edu.wpi.first.math.util.Units;
 public class CoralCryus extends SubsystemBase {
     private final SparkMax m_outtakecoral;
     private final SparkMax m_magicBox;
-    
+    private final SparkMax m_intake;
     private final RelativeEncoder m_encoder;
     private final PIDController m_magicBoxController = new PIDController(0 , 0 , 0);
     
@@ -35,8 +35,21 @@ public class CoralCryus extends SubsystemBase {
         m_outtakecoral = new SparkMax(13, MotorType.kBrushless);
         m_magicBox = new SparkMax(14, MotorType.kBrushless);
         m_encoder = m_magicBox.getEncoder();
+        m_intake = new SparkMax(16 , MotorType.kBrushless);
     }
 
+    //I have no clue if this is how we're supposed to code it but I based it off of shoot coral
+    public Command intake() {
+        return new StartEndCommand(
+            () -> m_intake.set(.2),
+            () -> m_intake.set(0));
+    }
+
+    public Command detake() {
+        return new StartEndCommand(
+            () -> m_intake.set(-.2),
+            () -> m_intake.set(0));
+    }
 
     public Command shootCoral() {
         return new StartEndCommand(
