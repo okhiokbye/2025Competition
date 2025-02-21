@@ -45,6 +45,12 @@ public class DriveLewis extends SubsystemBase {
     private NetworkTable table;
     private SwerveDrivePoseEstimator poseEstimator;
     private boolean doRejectUpdate = false;
+    StructPublisher<Pose3d> publisher1 = NetworkTableInstance.getDefault().getStructTopic("lewissucksihatehimandwanthimtodie", Pose3d.struct).publish();
+    StructPublisher<Pose3d> publisher2 = NetworkTableInstance.getDefault().getStructTopic("idonthatelewis", Pose3d.struct).publish();
+    StructPublisher<Pose3d> yagslPosePub = NetworkTableInstance.getDefault().getStructTopic("yagslPose", Pose3d.struct).publish();
+    private double Yawo = 0;
+    private double yawVelo = 0;
+
 
 
     public DriveLewis() {
@@ -65,25 +71,29 @@ public class DriveLewis extends SubsystemBase {
         
         poseEstimator = swerveDrive.swerveDrivePoseEstimator;
 
+        boolean rorb = NetworkTableInstance.getDefault().getTable("FMSInfo").getEntry("isRedAlliance").getBoolean(true);
+
+        if (rorb){
+          LimelightHelpers.setCameraPose_RobotSpace("limelight", .355, 0.0127, 0.0762, 0, 0, 0);
+        }
+        else {
+          LimelightHelpers.setCameraPose_RobotSpace("limelight", -.355, 0.0127, 0.0762, 0, 0, 180);
+        }
+      
+
           
     }
 
-    private double Yawo = 0;
-    private double yawVelo = 0;
 
-
-
-    StructPublisher<Pose3d> publisher1 = NetworkTableInstance.getDefault().getStructTopic("lewissucksihatehimandwanthimtodie", Pose3d.struct).publish();
-    StructPublisher<Pose3d> publisher2 = NetworkTableInstance.getDefault().getStructTopic("idonthatelewis", Pose3d.struct).publish();
-    StructPublisher<Pose3d> yagslPosePub = NetworkTableInstance.getDefault().getStructTopic("yagslPose", Pose3d.struct).publish();
     
 
-
+    
     
     public void periodic() {
 
         poseEstimator.update(swerveDrive.getYaw(), getModulePositions());
         LimelightHelpers.SetRobotOrientation("limelight", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+        
 
         LimelightHelpers.PoseEstimate botposeMT2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
 
