@@ -61,6 +61,7 @@ public class DriveLewis extends SubsystemBase {
         swerveDrive.setModuleEncoderAutoSynchronize(true, 0.50);
         swerveDrive.setAutoCenteringModules(false);
         swerveDrive.zeroGyro();
+        //swerveDrive.getGyro().setOffset(new Rotation3d(0,0,Math.PI));
         
         poseEstimator = swerveDrive.swerveDrivePoseEstimator;
 
@@ -72,16 +73,19 @@ public class DriveLewis extends SubsystemBase {
 
 
 
-    StructPublisher<Pose3d> publisher = NetworkTableInstance.getDefault().getStructTopic("lewissucksihatehimandwanthimtodie", Pose3d.struct).publish();
+    StructPublisher<Pose3d> publisher1 = NetworkTableInstance.getDefault().getStructTopic("lewissucksihatehimandwanthimtodie", Pose3d.struct).publish();
+    StructPublisher<Pose3d> publisher2 = NetworkTableInstance.getDefault().getStructTopic("idonthatelewis", Pose3d.struct).publish();
+    StructPublisher<Pose3d> yagslPosePub = NetworkTableInstance.getDefault().getStructTopic("yagslPose", Pose3d.struct).publish();
     
 
 
     
     public void periodic() {
-        LimelightHelpers.PoseEstimate botposeMT2 = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
 
         poseEstimator.update(swerveDrive.getYaw(), getModulePositions());
         LimelightHelpers.SetRobotOrientation("limelight", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+
+        LimelightHelpers.PoseEstimate botposeMT2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
 
         // double[] deft = {1.0,1.0,1.0,1.0,1.0,1.0};
         // double[] botpose = NetworkTableInstance.getDefault().getTable("limelight").getEntry("botpose").getDoubleArray(deft);
@@ -99,22 +103,32 @@ public class DriveLewis extends SubsystemBase {
         //   new Rotation3d(roll, pitch, yaw)
         // );
         
-        Pose3d posenew = LimelightHelpers.getBotPose3d_wpiBlue("limelight");
+       Pose3d posenew = LimelightHelpers.getBotPose3d_wpiBlue("limelight");
 
-        double yawRad = posenew.getRotation().getZ();
-        double yawDeg = Math.toDegrees(yawRad);
+        double yawRad1 = posenew.getRotation().getZ();
+        double yawRad2 = botposeMT2.pose.getRotation().getRadians();
+       // double yawDeg = Math.toDegrees(yawRad);
 
-        double tx = posenew.getTranslation().getX();
-        double ty = posenew.getTranslation().getY();
+        // double tx = posenew.getTranslation().getX();
+        // double ty = posenew.getTranslation().getY();
 
-        Pose3d correctedPose = new Pose3d(tx, ty, 0, new Rotation3d(0, 0, yawRad));
+        double mtx = botposeMT2.pose.getX();
+        double mty = botposeMT2.pose.getY();
+        
 
-        Pose3d robotPose = new Pose3d(botposeMT2.pose.getX(), botposeMT2.pose.getY(),0, new Rotation3d(0, 0, botposeMT2.pose.getRotation().getDegrees()));
+
+       // Pose3d correctedPose = new Pose3d(tx, ty, 0, new Rotation3d(0, 0, yawRad));
+        Pose3d lewispose1 = new Pose3d(mtx, mty, 0, new Rotation3d(0, 0, yawRad1));
+        Pose3d lewispose2 = new Pose3d(mtx, mty, 0, new Rotation3d(0, 0, yawRad2));
+
+       // Pose3d robotPose = new Pose3d(botposeMT2.pose.getX(), botposeMT2.pose.getY(),0, new Rotation3d(0, 0, botposeMT2.pose.getRotation().getDegrees()));
 
 
         // publisher.set(robotPose);
-        publisher.set(correctedPose); // NEW ONE
 
+        publisher1.set(lewispose1); // NEW ONE
+        publisher2.set(lewispose2); // NEW ONE
+     
 
 
         // publisher.set(robotPose);
@@ -137,7 +151,7 @@ public class DriveLewis extends SubsystemBase {
 
         
         
-        LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
+       // LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
 
         double Yawcurr = swerveDrive.getYaw().getDegrees();
         double changet = .02;
@@ -149,7 +163,7 @@ public class DriveLewis extends SubsystemBase {
         if (Math.abs(yawVelo) > 720) { // 720 degrees per second
             doRejectUpdate = true;
         }
-        if (mt2.tagCount == 0) {
+        if (botposeMT2.tagCount == 0) {  
             doRejectUpdate = true;
         }
 
@@ -157,10 +171,10 @@ public class DriveLewis extends SubsystemBase {
         if (!doRejectUpdate) {
           Matrix stdDevs = new Matrix<N3,N1>(Nat.N3(), Nat.N1(), new double[] {0.7, 0.7, 9999999});
           swerveDrive.setVisionMeasurementStdDevs(stdDevs);
-          swerveDrive.addVisionMeasurement(mt2.pose,mt2.timestampSeconds);
+          swerveDrive.addVisionMeasurement(botposeMT2.pose,botposeMT2.timestampSeconds);
         }
 
-
+          yagslPosePub.set(new Pose3d(swerveDrive.swerveDrivePoseEstimator.getEstimatedPosition()));
 
         
         // Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
