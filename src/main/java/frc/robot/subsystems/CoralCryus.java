@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 import java.io.File;
 import java.io.IOException;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import swervelib.parser.SwerveParser;
@@ -24,13 +25,18 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.DoubleArrayEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.PubSubOption;
 @SuppressWarnings("removal")
 public class CoralCryus extends PIDSubsystem {
     private final SparkMax m_shoot;
     private final SparkMax m_pitch;
     private final SparkMax m_intake;
     private final RelativeEncoder m_encoder;
-    private final PIDController m_pitchController = new PIDController(0 , 0 , 0);
+    private final DigitalInput beamBreak;
+    private final DoubleArrayEntry shooterInfo;
+   
     @SuppressWarnings("removal")
     public CoralCryus() {
         super(new PIDController(5,0,0),0);
@@ -39,6 +45,9 @@ public class CoralCryus extends PIDSubsystem {
         m_encoder = m_pitch.getEncoder();
         this.getController().disableContinuousInput();
         m_intake = new SparkMax(16 , MotorType.kBrushless);
+        double[] defaultArray = {0.0,0.0,0.0};
+        shooterInfo = NetworkTableInstance.getDefault().getDoubleArrayTopic("shooterInfo").getEntry(defaultArray, PubSubOption.keepDuplicates(true), PubSubOption.pollStorage(10));
+        beamBreak = new DigitalInput(0);
     }
     @Override
     public void useOutput(double output, double setpoint){
@@ -69,19 +78,20 @@ public class CoralCryus extends PIDSubsystem {
         );
     }
 
-    public void aim(int position) {
+    public Command aim(int position) {
         switch (position) {
             case 1:
-                setSetpoint(6969); // aim L1
-                break;
+            return new RunCommand(()-> setSetpoint(5465687), this); // aim L1
+            
             case 2:
-                setSetpoint(657689); // aim L4
-                break;
+            return new RunCommand(()-> setSetpoint(34567), this); // aim L4
+                
             case 3: 
-                setSetpoint(218731283); // reload position
-                break;
+            return new RunCommand(()-> setSetpoint(345678), this); // reload position
+        
             default:
-                break;
+            return new RunCommand(()-> System.out.println("how tf u call me"));
+                
         }
     }
   
@@ -89,7 +99,8 @@ public class CoralCryus extends PIDSubsystem {
 
     public void periodic() {
         // This method will be called once per scheduler run
-                
+        double[] info = {getMeasurement(), getSetpoint(), this.getController().getError(),beamBreak.get() ? 1d :0d}; //1= true, 0= false      
+        shooterInfo.set(info);
     }    
 
 }   

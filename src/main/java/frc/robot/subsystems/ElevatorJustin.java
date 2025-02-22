@@ -1,8 +1,18 @@
 package frc.robot.subsystems;
 
+import java.util.ArrayList;
+import java.util.concurrent.atomic.DoubleAdder;
+
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.networktables.DoubleArrayEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.PubSubOption;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.PIDSubsystem;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -10,66 +20,70 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ElevatorJustin extends PIDSubsystem {
 
-private final TalonFX m_elevator;
+private final SparkMax m_elevator1;
+private final SparkMax m_elevator2;
 
+private static final double LEVEL_0 = 567689;
 private static final double LEVEL_1 = 8.0; // idk what how these values are supposed to be calculated D:
 private static final double LEVEL_2 = 25.0;
 private static final double LEVEL_3 = 40.0;
-private static final double LEVEL_4 = 55.0;
+private static final double LEVEL_4 = 55.0;  
 
-
+private final DoubleArrayEntry elevatorInfo;
 @SuppressWarnings("removal")
 public ElevatorJustin() {
 //bastard
 //they call me the dog for how much i be lickin dem toes
-    super(new PIDController(0, 0, 0));
-    m_elevator = new TalonFX(16);
+    super(new PIDController(5, 0, 0), 0);
+    this.getController().disableContinuousInput();
+    m_elevator1 = new SparkMax(69, MotorType.kBrushless);
+    m_elevator2 = new SparkMax(69, MotorType.kBrushless);
+    double[] defaultArray = {0.0,0.0,0.0};
+    elevatorInfo = NetworkTableInstance.getDefault().getDoubleArrayTopic("elevatorInfo").getEntry(defaultArray, PubSubOption.keepDuplicates(true), PubSubOption.pollStorage(10));
 }
 
 @Override
 public void useOutput(double output, double setpoint) {
-  m_elevator.setVoltage(output);
+  m_elevator1.set(output);
+  m_elevator2.set(output);
 }
 
 @Override
 public double getMeasurement() {
-  return  m_elevator.getRotorPosition().getValueAsDouble();
+  return  m_elevator1.getEncoder().getPosition();
 }
+
 
 @SuppressWarnings("removal")
 public Command elevate(int input) {
-  double currPosition = getMeasurement();
-  double targetPosition;
-  double motorPower;
+ //WHEN MOVING ELEVATOR UP AND DOWN STOW IN L4 AIM POSITION OR ELSE INTAKE DIE
 
   switch(input) {
     case 1:
-      targetPosition = LEVEL_1;
-      break;
+    return new RunCommand(()-> setSetpoint(LEVEL_1), this);
     
     case 2:
-    targetPosition = LEVEL_2;
-    break;
+    return new RunCommand(()-> setSetpoint(LEVEL_2),this);
     
     case 3:
-    targetPosition = LEVEL_3;
-    break;
+    return new RunCommand(()-> setSetpoint(LEVEL_3),this);
     
     case 4:
-    targetPosition = LEVEL_4;
-    break;
-    
-    default:
-      return new RunCommand(() -> m_elevator.set(0)); 
+    return new RunCommand(()-> setSetpoint(LEVEL_4), this);
+
+    case 5: 
+    return new RunCommand(()-> setSetpoint(LEVEL_0), this); // reload height
+    default: 
+    return new RunCommand(()-> System.out.println("how tf u call me"));
   }
 
-  motorPower = super.getController().calculate(currPosition, targetPosition);
-  return new RunCommand(() -> m_elevator.set(motorPower));
+ 
 
 }
 
 public void periodic() {
-  // maybe use in future
+  double[] info = {getMeasurement(),getSetpoint(),this.getController().getError()};
+  elevatorInfo.set(info);
 
 }
 }

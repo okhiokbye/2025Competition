@@ -13,6 +13,8 @@ import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.CoralCryus;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
@@ -36,9 +38,9 @@ public class RobotContainer {
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandJoystick m_driverController = new CommandJoystick(0);
   private final CommandJoystick m_aimJoystick = new CommandJoystick(1);
-//  private final DriveLewis m_swerve = new DriveLewis();
+  private final DriveLewis m_swerve = new DriveLewis();
   private final CoralCryus m_outtakecoral = new CoralCryus();
- // private final ElevatorJustin m_elevator = new ElevatorJustin();
+  private final ElevatorJustin m_elevator = new ElevatorJustin();
 
   
   public RobotContainer() {
@@ -59,21 +61,21 @@ public class RobotContainer {
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     
-    // m_swerve.setDefaultCommand(m_swerve.driveCommand(
-    //   () -> -m_driverController.getRawAxis(1), 
-    //   ()-> -m_driverController.getRawAxis(0), 
-    //   ()->-m_driverController.getRawAxis(2)
-    // ));
+     m_swerve.setDefaultCommand(m_swerve.driveCommand(
+       () -> -m_driverController.getRawAxis(1), 
+       ()-> -m_driverController.getRawAxis(0), 
+       ()->-m_driverController.getRawAxis(2)
+     ));
 
     m_aimJoystick.button(1).onTrue(m_outtakecoral.shootCoral().withTimeout(0.5));
     m_aimJoystick.button(2).onTrue(m_outtakecoral.intake().withTimeout(0.2));
-    m_aimJoystick.button(7).onTrue(m_outtakecoral.aimL1());
-    m_aimJoystick.button(8).onTrue(m_outtakecoral.aimL4());
+    m_aimJoystick.button(7).onTrue( new RunCommand( ()-> m_outtakecoral.aim(1)));
+    m_aimJoystick.button(8).onTrue(new RunCommand(()->m_outtakecoral.aim(4)));
     
-    // m_aimJoystick.button(4).onTrue(m_elevator.elevate(1));
-    // m_aimJoystick.button(5).onTrue(m_elevator.elevate(2));
-    // m_aimJoystick.button(6).onTrue(m_elevator.elevate(3));
-    // m_aimJoystick.button(7).onTrue(m_elevator.elevate(4));
+     m_aimJoystick.button(4).onTrue(Commands.parallel(m_elevator.elevate(1), m_outtakecoral.aim(4)).andThen(m_outtakecoral.aim(1))) ; // aim L1
+     m_aimJoystick.button(5).onTrue(new RunCommand( ()-> m_elevator.elevate(2))); // aim L2
+     m_aimJoystick.button(6).onTrue(new RunCommand( ()-> m_elevator.elevate(3))); // aim L3
+     m_aimJoystick.button(7).onTrue(new RunCommand( ()-> m_elevator.elevate(4))); // aim L4
     
   }
 
