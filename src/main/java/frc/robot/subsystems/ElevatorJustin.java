@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.DoubleAdder;
+import java.util.function.BooleanSupplier;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.spark.SparkMax;
@@ -13,6 +14,7 @@ import edu.wpi.first.networktables.DoubleArrayEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PubSubOption;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.PIDSubsystem;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -28,6 +30,7 @@ private static final double LEVEL_1 = 8.0; // idk what how these values are supp
 private static final double LEVEL_2 = 25.0;
 private static final double LEVEL_3 = 40.0;
 private static final double LEVEL_4 = 55.0;  
+private DigitalInput limitSwitch;
 
 private final DoubleArrayEntry elevatorInfo;
 @SuppressWarnings("removal")
@@ -37,13 +40,17 @@ public ElevatorJustin() {
     super(new PIDController(5, 0, 0), 0);
     this.getController().disableContinuousInput();
     m_elevator1 = new SparkMax(69, MotorType.kBrushless);
-    m_elevator2 = new SparkMax(69, MotorType.kBrushless);
+    m_elevator2 = new SparkMax(68, MotorType.kBrushless);
     double[] defaultArray = {0.0,0.0,0.0};
     elevatorInfo = NetworkTableInstance.getDefault().getDoubleArrayTopic("elevatorInfo").getEntry(defaultArray, PubSubOption.keepDuplicates(true), PubSubOption.pollStorage(10));
-}
+    limitSwitch = new DigitalInput(1);  
+    m_elevator1.getEncoder().setPosition(0);
+    m_elevator2.getEncoder().setPosition(0);
+    
+  }
 
 @Override
-public void useOutput(double output, double setpoint) {
+public void useOutput(double output, double setpoint) { 
   m_elevator1.set(output);
   m_elevator2.set(output);
 }
@@ -53,6 +60,16 @@ public double getMeasurement() {
   return  m_elevator1.getEncoder().getPosition();
 }
 
+public BooleanSupplier getLimit(){
+  return ()-> limitSwitch.get();
+}
+public Command zero(){
+  return runOnce( ()-> this.zero());
+}
+public void zeroHeight(){
+  m_elevator1.getEncoder().setPosition(0);
+  m_elevator2.getEncoder().setPosition(0);
+}
 
 @SuppressWarnings("removal")
 public Command elevate(int input) {
@@ -84,7 +101,6 @@ public Command elevate(int input) {
 public void periodic() {
   double[] info = {getMeasurement(),getSetpoint(),this.getController().getError()};
   elevatorInfo.set(info);
-
 }
 }
 

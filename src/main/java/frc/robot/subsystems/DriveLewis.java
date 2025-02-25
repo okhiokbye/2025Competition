@@ -10,13 +10,17 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathConstraints;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -47,10 +51,12 @@ public class DriveLewis extends SubsystemBase {
     private boolean doRejectUpdate = false;
     StructPublisher<Pose3d> publisher1 = NetworkTableInstance.getDefault().getStructTopic("lewissucksihatehimandwanthimtodie", Pose3d.struct).publish();
     StructPublisher<Pose3d> publisher2 = NetworkTableInstance.getDefault().getStructTopic("idonthatelewis", Pose3d.struct).publish();
+    StructPublisher<Pose2d> publisher3 = NetworkTableInstance.getDefault().getStructTopic("lewisistheworstpersoneverNEWPOSES", Pose2d.struct).publish();
+    
     StructPublisher<Pose3d> yagslPosePub = NetworkTableInstance.getDefault().getStructTopic("yagslPose", Pose3d.struct).publish();
     private double Yawo = 0;
     private double yawVelo = 0;
-
+    private final AprilTagFieldLayout layout = AprilTagFields.k2025Reefscape.loadAprilTagLayoutField();
 
 
     public DriveLewis() {
@@ -70,8 +76,8 @@ public class DriveLewis extends SubsystemBase {
         //swerveDrive.getGyro().setOffset(new Rotation3d(0,0,Math.PI));
         
         poseEstimator = swerveDrive.swerveDrivePoseEstimator;
-
-        boolean rorb = NetworkTableInstance.getDefault().getTable("FMSInfo").getEntry("isRedAlliance").getBoolean(true);
+        var alliance = DriverStation.getAlliance();
+        boolean rorb = alliance.get() == DriverStation.Alliance.Red;
 
         if (rorb){
           LimelightHelpers.setCameraPose_RobotSpace("limelight", .355, 0.0127, 0.0762, 0, 0, 0);
@@ -95,50 +101,57 @@ public class DriveLewis extends SubsystemBase {
         LimelightHelpers.SetRobotOrientation("limelight", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
         
 
-        LimelightHelpers.PoseEstimate botposeMT2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
+    //     LimelightHelpers.PoseEstimate botposeMT2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
 
-        // double[] deft = {1.0,1.0,1.0,1.0,1.0,1.0};
-        // double[] botpose = NetworkTableInstance.getDefault().getTable("limelight").getEntry("botpose").getDoubleArray(deft);
-     // LimelightHelpers.LimelightResults.getBotPose3d_wpiBlue();
+    //     // double[] deft = {1.0,1.0,1.0,1.0,1.0,1.0};
+    //     // double[] botpose = NetworkTableInstance.getDefault().getTable("limelight").getEntry("botpose").getDoubleArray(deft);
+    //  // LimelightHelpers.LimelightResults.getBotPose3d_wpiBlue();
         
-        // double tx = botposeMT2[0];
-        // double ty = botposeMT2[1];
-        // double tz = botposeMT2[2];
-        //  double roll = botpose[3];
-        //  double pitch = botpose[4];
-        //  double yaw = botpose[5];
+    //     // double tx = botposeMT2[0];
+    //     // double ty = botposeMT2[1];
+    //     // double tz = botposeMT2[2];
+    //     //  double roll = botpose[3];
+    //     //  double pitch = botpose[4];
+    //     //  double yaw = botpose[5];
 
-        // Pose3d robotPose = new Pose3d(
-        //   tx, ty, tz,
-        //   new Rotation3d(roll, pitch, yaw)
-        // );
+    //     // Pose3d robotPose = new Pose3d(
+    //     //   tx, ty, tz,
+    //     //   new Rotation3d(roll, pitch, yaw)
+    //     // );
         
-       Pose3d posenew = LimelightHelpers.getBotPose3d_wpiBlue("limelight");
+    //    Pose3d posenew = LimelightHelpers.getBotPose3d_wpiBlue("limelight");
 
-        double yawRad1 = posenew.getRotation().getZ();
-        double yawRad2 = botposeMT2.pose.getRotation().getRadians();
-       // double yawDeg = Math.toDegrees(yawRad);
+    //     double yawRad1 = posenew.getRotation().getZ();
+    //     double yawRad2 = botposeMT2.pose.getRotation().getRadians();
+    //    // double yawDeg = Math.toDegrees(yawRad);
 
-        // double tx = posenew.getTranslation().getX();
-        // double ty = posenew.getTranslation().getY();
+    //     // double tx = posenew.getTranslation().getX();
+    //     // double ty = posenew.getTranslation().getY();
 
-        double mtx = botposeMT2.pose.getX();
-        double mty = botposeMT2.pose.getY();
+    //     double mtx = botposeMT2.pose.getX();
+    //     double mty = botposeMT2.pose.getY();
         
 
 
-       // Pose3d correctedPose = new Pose3d(tx, ty, 0, new Rotation3d(0, 0, yawRad));
-        Pose3d lewispose1 = new Pose3d(mtx, mty, 0, new Rotation3d(0, 0, yawRad1));
-        Pose3d lewispose2 = new Pose3d(mtx, mty, 0, new Rotation3d(0, 0, yawRad2));
+    //    // Pose3d correctedPose = new Pose3d(tx, ty, 0, new Rotation3d(0, 0, yawRad));
+    //     Pose3d lewispose1 = new Pose3d(mtx, mty, 0, new Rotation3d(0, 0, yawRad1));
+    //     Pose3d lewispose2 = new Pose3d(mtx, mty, 0, new Rotation3d(0, 0, yawRad2));
 
        // Pose3d robotPose = new Pose3d(botposeMT2.pose.getX(), botposeMT2.pose.getY(),0, new Rotation3d(0, 0, botposeMT2.pose.getRotation().getDegrees()));
 
 
         // publisher.set(robotPose);
 
-        publisher1.set(lewispose1); // NEW ONE
-        publisher2.set(lewispose2); // NEW ONE
-     
+        // publisher1.set(lewispose1); 
+        // publisher2.set(lewispose2); // NEW ONE
+
+
+
+        Pose2d[] lew = new Pose2d[4];
+        publisher3.set(findLeftBranch(17));
+        // publisher3.set(findLeftBranch(17));
+        // publisher3.set(findRightBranch(18));
+        // publisher3.set(findLeftBranch(18));
 
 
         // publisher.set(robotPose);
@@ -163,28 +176,28 @@ public class DriveLewis extends SubsystemBase {
         
        // LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
 
-        double Yawcurr = swerveDrive.getYaw().getDegrees();
-        double changet = .02;
+        // double Yawcurr = swerveDrive.getYaw().getDegrees();
+        // double changet = .02;
 
-        yawVelo = (Yawcurr - Yawo) / changet;
-        Yawo = Yawcurr;
+        // yawVelo = (Yawcurr - Yawo) / changet;
+        // Yawo = Yawcurr;
 
 
-        if (Math.abs(yawVelo) > 720) { // 720 degrees per second
-            doRejectUpdate = true;
-        }
-        if (botposeMT2.tagCount == 0) {  
-            doRejectUpdate = true;
-        }
+        // if (Math.abs(yawVelo) > 720) { // 720 degrees per second
+        //     doRejectUpdate = true;
+        // }
+        // if (botposeMT2.tagCount == 0) {  
+        //     doRejectUpdate = true;
+        // }
 
-        // Add vision measurement to pose estimator
-        if (!doRejectUpdate) {
-          Matrix stdDevs = new Matrix<N3,N1>(Nat.N3(), Nat.N1(), new double[] {0.7, 0.7, 9999999});
-          swerveDrive.setVisionMeasurementStdDevs(stdDevs);
-          swerveDrive.addVisionMeasurement(botposeMT2.pose,botposeMT2.timestampSeconds);
-        }
+        // // Add vision measurement to pose estimator
+        // if (!doRejectUpdate) {
+        //   Matrix stdDevs = new Matrix<N3,N1>(Nat.N3(), Nat.N1(), new double[] {0.7, 0.7, 9999999});
+        //   swerveDrive.setVisionMeasurementStdDevs(stdDevs);
+        //   swerveDrive.addVisionMeasurement(botposeMT2.pose,botposeMT2.timestampSeconds);
+        // }
 
-          yagslPosePub.set(new Pose3d(swerveDrive.swerveDrivePoseEstimator.getEstimatedPosition()));
+        //   yagslPosePub.set(new Pose3d(swerveDrive.swerveDrivePoseEstimator.getEstimatedPosition()));
 
         
         // Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
@@ -276,8 +289,63 @@ public class DriveLewis extends SubsystemBase {
                 );
               }
 
-  private void driveRobotRelative(ChassisSpeeds speeds) {
-     // TODO Auto-generated method stub)
+
+
+    public Pose2d findLeftBranch(long id){
+    // long id =  NetworkTableInstance.getDefault().getTable("limelight").getEntry("tid").getInteger(0); // get primary id
+    
+    double -x_off = Units.inchesToMeters(5);
+    double y_off = -Units.inchesToMeters(9+15); //change to left offset later
+   
+
+    Pose2d goalPose = layout.getTagPose((int)id).get().toPose2d();
+    Pose2d goalPose2 = new Pose2d(goalPose.getX() + x_off*Math.cos(Math.toRadians(90-goalPose.getRotation().getDegrees()))+y_off*Math.cos(goalPose.getRotation().getRadians()), goalPose.getY() + x_off*Math.sin(Math.toRadians(90-goalPose.getRotation().getDegrees()))-y_off*Math.sin(goalPose.getRotation().getRadians()), new Rotation2d(Math.PI + goalPose.getRotation().getRadians())); 
+
+    // get offset targeted pose?
+      return goalPose2; // TODO: find biggest apriltag in view, set pose to track as offset (see reef) 
+
+    }
+
+    public Pose2d findRightBranch(long id){
+      // long id =  NetworkTableInstance.getDefault().getTable("limelight").getEntry("tid").getInteger(0); // get primary id
+    
+      double x_off = -5;
+      double y_off = 9; //change to left offset later
+   
+
+      Pose2d goalPose = layout.getTagPose((int)id).get().toPose2d();
+      Pose2d goalPose2 = new Pose2d(goalPose.getX() + x_off*Math.cos(Math.toRadians(90-goalPose.getRotation().getDegrees()))+y_off*Math.cos(goalPose.getRotation().getRadians()), goalPose.getX() + x_off*Math.sin(Math.toRadians(90-goalPose.getRotation().getDegrees()))-y_off*Math.sin(goalPose.getRotation().getRadians()), new Rotation2d(Math.PI + goalPose.getRotation().getRadians())); 
+
+      // get offset targeted pose?
+      return goalPose2; // TODO: find biggest apriltag in view, set pose to track as offset (see reef) 
+    }
+    
+
+    // Pose2d[] lewis = new Pose2d[12];
+    // lewis[1] = findRightBranch(17);
+    // lewis[2] = findLeftBranch(17);
+    // publisher3.set();
+   
+
+
+
+
+
+
+    public Command driveToPose(Pose2d pose) { 
+      // Create the constraints to use while pathfinding
+      PathConstraints constraints = new PathConstraints(
+          swerveDrive.getMaximumChassisVelocity(), 4.0,
+          swerveDrive.getMaximumChassisAngularVelocity(), Units.degreesToRadians(720));
+      // Since AutoBuilder is configured, we can use it to build pathfinding commands
+      return AutoBuilder.pathfindToPose(
+          pose,
+          constraints,
+          edu.wpi.first.units.Units.MetersPerSecond.of(0) // Goal end velocity in meters/sec
+      );
+    }
+    private void driveRobotRelative(ChassisSpeeds speeds) {
+     // TODO Auto-generated method stub)k 
      swerveDrive.drive(speeds);
               }
 
@@ -288,11 +356,10 @@ public class DriveLewis extends SubsystemBase {
       return run(() -> {
         // Make the robot move
         swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
-            MathUtil.applyDeadband(translationX.getAsDouble(), 0.2)* swerveDrive.getMaximumChassisVelocity(),
-            MathUtil.applyDeadband(translationY.getAsDouble(), 0.2) * swerveDrive.getMaximumChassisVelocity()
-                ),
-            0.8),
-            Math.pow(MathUtil.applyDeadband(angularRotationX.getAsDouble(), 0.5), 3) 
+            Math.pow(MathUtil.applyDeadband(translationX.getAsDouble(), 0.2),2)* swerveDrive.getMaximumChassisVelocity(),
+            Math.pow(MathUtil.applyDeadband(translationY.getAsDouble(), 0.2),2) * swerveDrive.getMaximumChassisVelocity()
+                ),0.8),
+            Math.pow(MathUtil.applyDeadband(angularRotationX.getAsDouble(), 0.2), 2) 
                 * swerveDrive.getMaximumChassisAngularVelocity(),
             true,
             false);

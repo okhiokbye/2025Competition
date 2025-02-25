@@ -14,6 +14,8 @@ import edu.wpi.first.wpilibj2.command.PIDSubsystem;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.Commands.*;
+
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import com.revrobotics.spark.SparkMax;
@@ -43,8 +45,9 @@ public class CoralCryus extends PIDSubsystem {
         m_shoot = new SparkMax(13, MotorType.kBrushless);
         m_pitch = new SparkMax(14, MotorType.kBrushless);
         m_encoder = m_pitch.getEncoder();
+        m_encoder.setPosition(0);
         this.getController().disableContinuousInput();
-        m_intake = new SparkMax(16 , MotorType.kBrushless);
+        m_intake = new SparkMax(67 , MotorType.kBrushless);
         double[] defaultArray = {0.0,0.0,0.0};
         shooterInfo = NetworkTableInstance.getDefault().getDoubleArrayTopic("shooterInfo").getEntry(defaultArray, PubSubOption.keepDuplicates(true), PubSubOption.pollStorage(10));
         beamBreak = new DigitalInput(0);
@@ -76,6 +79,9 @@ public class CoralCryus extends PIDSubsystem {
             () -> m_shoot.set(-0.6),
             () -> m_shoot.set(0)
         );
+    }
+    public BooleanSupplier beamBreak(){
+        return () -> beamBreak.get();
     }
 
     public Command aim(int position) {

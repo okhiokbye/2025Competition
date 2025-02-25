@@ -11,6 +11,7 @@ import frc.robot.subsystems.DriveLewis;
 import frc.robot.subsystems.ElevatorJustin;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.CoralCryus;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -22,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import java.io.File;
 import java.util.function.Supplier;
 
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
 /**
@@ -39,14 +41,27 @@ public class RobotContainer {
   private final CommandJoystick m_driverController = new CommandJoystick(0);
   private final CommandJoystick m_aimJoystick = new CommandJoystick(1);
   private final DriveLewis m_swerve = new DriveLewis();
-  private final CoralCryus m_outtakecoral = new CoralCryus();
+  private final CoralCryus m_shooter = new CoralCryus();
   private final ElevatorJustin m_elevator = new ElevatorJustin();
 
   
   public RobotContainer() {
+    NamedCommands.registerCommand("elevateL1", m_elevator.elevate(1));
+    NamedCommands.registerCommand("elevateL2", m_elevator.elevate(2));
+    NamedCommands.registerCommand("elevateL3", m_elevator.elevate(3));
+    NamedCommands.registerCommand("elevateL4", m_elevator.elevate(4));
+    NamedCommands.registerCommand("elevateL0", m_elevator.elevate(1)); // reload
+
+    NamedCommands.registerCommand("aimL1", m_shooter.aim(1)); 
+    NamedCommands.registerCommand("aimL4", m_shooter.aim(2));
+    NamedCommands.registerCommand("aimL0", m_shooter.aim(3)); // reload 
+    NamedCommands.registerCommand("shoot", m_shooter.shootCoral());
+    NamedCommands.registerCommand("intake", m_shooter.intake());
+    // NamedCommands.registerCommand("getBeamBreak",  m_shooter.beamBreak()); figure out what pathplanner needs for intake stopping later - or maybe it doesnt matter
+   
     // Configure the trigger bindings
     configureBindings();
-   // m_swerve.configureAutoBuilder();
+    m_swerve.configureAutoBuilder();
   }
 
   /**
@@ -67,16 +82,25 @@ public class RobotContainer {
        ()->-m_driverController.getRawAxis(2)
      ));
 
-    m_aimJoystick.button(1).onTrue(m_outtakecoral.shootCoral().withTimeout(0.5));
-    m_aimJoystick.button(2).onTrue(m_outtakecoral.intake().withTimeout(0.2));
-    m_aimJoystick.button(7).onTrue( new RunCommand( ()-> m_outtakecoral.aim(1)));
-    m_aimJoystick.button(8).onTrue(new RunCommand(()->m_outtakecoral.aim(4)));
+    m_aimJoystick.button(1).onTrue(m_shooter.shootCoral().withTimeout(0.5));
+    m_aimJoystick.button(2).onTrue(m_shooter.intake().until(m_shooter.beamBreak()));
+  
+     m_aimJoystick.button(3).onTrue(m_elevator.runOnce(()->m_elevator.setSetpoint(m_elevator.getSetpoint()-(0.05))) ); //fine tune for zero routine
+     m_aimJoystick.button(4).onTrue(m_elevator.runOnce(()->m_elevator.setSetpoint(m_elevator.getSetpoint()+(0.05))) ); //fine tune for zero routine
+     m_aimJoystick.button(6).and(m_elevator.getLimit()).onTrue(m_elevator.zero()); // zero if the limit switch is also triggered
+
+     m_aimJoystick.button(9).onTrue(Commands.parallel(m_elevator.elevate(1), m_shooter.aim(4)).andThen(m_shooter.aim(1))); // aim L1
+     m_aimJoystick.button(10).onTrue(Commands.parallel(m_elevator.elevate(2), m_shooter.aim(4)).andThen(m_shooter.aim(2))); // aim L2
+     m_aimJoystick.button(11).onTrue(Commands.parallel(m_elevator.elevate(3), m_shooter.aim(4)).andThen(m_shooter.aim(3))); // aim L3
+     m_aimJoystick.button(12).onTrue(Commands.parallel(m_elevator.elevate(4), m_shooter.aim(4)).andThen(m_shooter.aim(4))); // aim L4
+     m_aimJoystick.button(2).onTrue(Commands.parallel(m_elevator.elevate(4), m_shooter.aim(4)).andThen(m_shooter.aim(5)));
+   
+     // AUTOALIGn BUTTONS ARE 7 AND 8, LEFT AND RIGHT REEF BRANCH RESPECTIVELY
+     /* 
+     m_driverController.button(7).onTrue(m_swerve.driveToPose(new Pose2d()));
+     m_driverController.button(8).onTrue(m_swerve.driveToPose(new Pose2d())); 
     
-     m_aimJoystick.button(4).onTrue(Commands.parallel(m_elevator.elevate(1), m_outtakecoral.aim(4)).andThen(m_outtakecoral.aim(1))) ; // aim L1
-     m_aimJoystick.button(5).onTrue(new RunCommand( ()-> m_elevator.elevate(2))); // aim L2
-     m_aimJoystick.button(6).onTrue(new RunCommand( ()-> m_elevator.elevate(3))); // aim L3
-     m_aimJoystick.button(7).onTrue(new RunCommand( ()-> m_elevator.elevate(4))); // aim L4
-    
+    */
   }
 
   /**
