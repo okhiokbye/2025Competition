@@ -62,8 +62,9 @@ public class RobotContainer {
     // NamedCommands.registerCommand("getBeamBreak",  m_shooter.beamBreak()); figure out what pathplanner needs for intake stopping later - or maybe it doesnt matter
    
     // Configure the trigger bindings
-    configureBindings();
     m_swerve.configureAutoBuilder();
+    configureBindings();
+ 
     PathfindingCommand.warmupCommand().schedule();
   }
 
@@ -98,7 +99,7 @@ public class RobotContainer {
      m_aimJoystick.button(12).onTrue(Commands.parallel(m_elevator.elevate(4), m_shooter.aim(4)).andThen(m_shooter.aim(4))); // aim L4
      m_aimJoystick.button(2).onTrue(Commands.parallel(m_elevator.elevate(4), m_shooter.aim(4)).andThen(m_shooter.aim(5)));
    
-     // AUTOALIGn BUTTONS ARE 7 AND 8, LEFT AND RIGHT REEF BRANCH RESPECTIVELY
+     //AUTOALIGn BUTTONS ARE 7 AND 8, LEFT AND RIGHT REEF BRANCH RESPECTIVELY
      
      m_driverController.button(7).onTrue(m_swerve.driveToPose(m_vision.findRightBranch()));
      m_driverController.button(8).onTrue(m_swerve.driveToPose(m_vision.findLeftBranch())); 
