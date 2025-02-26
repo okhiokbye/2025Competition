@@ -23,10 +23,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class ElevatorJustin extends PIDSubsystem {
 
 private final SparkMax m_elevator1;
-private final SparkMax m_elevator2;
 
 private static final double LEVEL_0 = 567689;
-private static final double LEVEL_1 = 8.0; // idk what how these values are supposed to be calculated D:
+private static final double LEVEL_1 = 8.0;
 private static final double LEVEL_2 = 25.0;
 private static final double LEVEL_3 = 40.0;
 private static final double LEVEL_4 = 55.0;  
@@ -35,24 +34,22 @@ private DigitalInput limitSwitch;
 private final DoubleArrayEntry elevatorInfo;
 @SuppressWarnings("removal")
 public ElevatorJustin() {
-//bastard
-//they call me the dog for how much i be lickin dem toes
     super(new PIDController(5, 0, 0), 0);
     this.getController().disableContinuousInput();
-    m_elevator1 = new SparkMax(69, MotorType.kBrushless);
-    m_elevator2 = new SparkMax(68, MotorType.kBrushless);
+    m_elevator1 = new SparkMax(16, MotorType.kBrushless);
+  
     double[] defaultArray = {0.0,0.0,0.0};
     elevatorInfo = NetworkTableInstance.getDefault().getDoubleArrayTopic("elevatorInfo").getEntry(defaultArray, PubSubOption.keepDuplicates(true), PubSubOption.pollStorage(10));
     limitSwitch = new DigitalInput(1);  
     m_elevator1.getEncoder().setPosition(0);
-    m_elevator2.getEncoder().setPosition(0);
+
     
   }
 
 @Override
 public void useOutput(double output, double setpoint) { 
   m_elevator1.set(output);
-  m_elevator2.set(output);
+
 }
 
 @Override
@@ -68,7 +65,7 @@ public Command zero(){
 }
 public void zeroHeight(){
   m_elevator1.getEncoder().setPosition(0);
-  m_elevator2.getEncoder().setPosition(0);
+
 }
 
 @SuppressWarnings("removal")

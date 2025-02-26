@@ -51,7 +51,8 @@ public class DriveLewis extends SubsystemBase {
     private boolean doRejectUpdate = false;
     StructPublisher<Pose3d> publisher1 = NetworkTableInstance.getDefault().getStructTopic("lewissucksihatehimandwanthimtodie", Pose3d.struct).publish();
     StructPublisher<Pose3d> publisher2 = NetworkTableInstance.getDefault().getStructTopic("idonthatelewis", Pose3d.struct).publish();
-    StructPublisher<Pose2d> publisher3 = NetworkTableInstance.getDefault().getStructTopic("lewisistheworstpersoneverNEWPOSES", Pose2d.struct).publish();
+    StructPublisher<Pose2d> publisher3 = NetworkTableInstance.getDefault().getStructTopic("lewisistheworstpersoneverNEWPOSE1", Pose2d.struct).publish();
+    StructPublisher<Pose2d> publisher4 = NetworkTableInstance.getDefault().getStructTopic("lewisisnotagoodpersonNEWPOSE2", Pose2d.struct).publish();
     
     StructPublisher<Pose3d> yagslPosePub = NetworkTableInstance.getDefault().getStructTopic("yagslPose", Pose3d.struct).publish();
     private double Yawo = 0;
@@ -89,9 +90,6 @@ public class DriveLewis extends SubsystemBase {
 
           
     }
-
-
-    
 
     
     
@@ -147,11 +145,8 @@ public class DriveLewis extends SubsystemBase {
 
 
 
-        Pose2d[] lew = new Pose2d[4];
-        publisher3.set(findLeftBranch(17));
-        // publisher3.set(findLeftBranch(17));
-        // publisher3.set(findRightBranch(18));
-        // publisher3.set(findLeftBranch(18));
+        publisher3.set(findRightBranch());
+        publisher4.set(findLeftBranch());
 
 
         // publisher.set(robotPose);
@@ -291,40 +286,41 @@ public class DriveLewis extends SubsystemBase {
 
 
 
-    public Pose2d findLeftBranch(long id){
-    // long id =  NetworkTableInstance.getDefault().getTable("limelight").getEntry("tid").getInteger(0); // get primary id
+    public Pose2d findLeftBranch(){
+    long id =  NetworkTableInstance.getDefault().getTable("limelight").getEntry("tid").getInteger(0); // get primary id
     
-    double -x_off = Units.inchesToMeters(5);
-    double y_off = -Units.inchesToMeters(9+15); //change to left offset later
+    double x_off = Units.inchesToMeters(5);
+    double y_off = Units.inchesToMeters(9+15); //change to left offset later
    
 
     Pose2d goalPose = layout.getTagPose((int)id).get().toPose2d();
-    Pose2d goalPose2 = new Pose2d(goalPose.getX() + x_off*Math.cos(Math.toRadians(90-goalPose.getRotation().getDegrees()))+y_off*Math.cos(goalPose.getRotation().getRadians()), goalPose.getY() + x_off*Math.sin(Math.toRadians(90-goalPose.getRotation().getDegrees()))-y_off*Math.sin(goalPose.getRotation().getRadians()), new Rotation2d(Math.PI + goalPose.getRotation().getRadians())); 
+    Pose2d goalPose2 = new Pose2d(goalPose.getX() + x_off*Math.cos(Math.toRadians(90+goalPose.getRotation().getDegrees()))+y_off*Math.cos(goalPose.getRotation().getRadians()),
+                                  goalPose.getY() + x_off*Math.sin(Math.toRadians(90+goalPose.getRotation().getDegrees()))+y_off*Math.sin(goalPose.getRotation().getRadians()),
+                                  new Rotation2d(Math.PI + goalPose.getRotation().getRadians())); 
 
     // get offset targeted pose?
       return goalPose2; // TODO: find biggest apriltag in view, set pose to track as offset (see reef) 
 
     }
 
-    public Pose2d findRightBranch(long id){
-      // long id =  NetworkTableInstance.getDefault().getTable("limelight").getEntry("tid").getInteger(0); // get primary id
+    public Pose2d findRightBranch(){
+      long id =  NetworkTableInstance.getDefault().getTable("limelight").getEntry("tid").getInteger(0); // get primary id
     
-      double x_off = -5;
-      double y_off = 9; //change to left offset later
+      double x_off = -Units.inchesToMeters(5);
+      double y_off = Units.inchesToMeters(9+15); //change to left offset later
    
-
       Pose2d goalPose = layout.getTagPose((int)id).get().toPose2d();
-      Pose2d goalPose2 = new Pose2d(goalPose.getX() + x_off*Math.cos(Math.toRadians(90-goalPose.getRotation().getDegrees()))+y_off*Math.cos(goalPose.getRotation().getRadians()), goalPose.getX() + x_off*Math.sin(Math.toRadians(90-goalPose.getRotation().getDegrees()))-y_off*Math.sin(goalPose.getRotation().getRadians()), new Rotation2d(Math.PI + goalPose.getRotation().getRadians())); 
+      Pose2d goalPose2 = new Pose2d(goalPose.getX() + x_off*Math.cos(Math.toRadians(90+goalPose.getRotation().getDegrees()))+y_off*Math.cos(goalPose.getRotation().getRadians()),
+                                    goalPose.getY() + x_off*Math.sin(Math.toRadians(90+goalPose.getRotation().getDegrees()))+y_off*Math.sin(goalPose.getRotation().getRadians()),
+                                    new Rotation2d(Math.PI + goalPose.getRotation().getRadians())); 
+  
 
+     
       // get offset targeted pose?
       return goalPose2; // TODO: find biggest apriltag in view, set pose to track as offset (see reef) 
     }
     
 
-    // Pose2d[] lewis = new Pose2d[12];
-    // lewis[1] = findRightBranch(17);
-    // lewis[2] = findLeftBranch(17);
-    // publisher3.set();
    
 
 

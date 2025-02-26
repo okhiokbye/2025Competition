@@ -5,11 +5,11 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.Autos;
-import frc.robot.commands.ExampleCommand;
+
 import frc.robot.subsystems.DriveLewis;
 import frc.robot.subsystems.ElevatorJustin;
-import frc.robot.subsystems.ExampleSubsystem;
+
+import frc.robot.subsystems.Vision;
 import frc.robot.subsystems.CoralCryus;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -25,6 +25,7 @@ import java.util.function.Supplier;
 
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.commands.PathfindingCommand;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -35,12 +36,13 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
+
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandJoystick m_driverController = new CommandJoystick(0);
   private final CommandJoystick m_aimJoystick = new CommandJoystick(1);
   private final DriveLewis m_swerve = new DriveLewis();
+  private final Vision m_vision = new Vision();
   private final CoralCryus m_shooter = new CoralCryus();
   private final ElevatorJustin m_elevator = new ElevatorJustin();
 
@@ -62,6 +64,7 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureBindings();
     m_swerve.configureAutoBuilder();
+    PathfindingCommand.warmupCommand().schedule();
   }
 
   /**
@@ -96,11 +99,11 @@ public class RobotContainer {
      m_aimJoystick.button(2).onTrue(Commands.parallel(m_elevator.elevate(4), m_shooter.aim(4)).andThen(m_shooter.aim(5)));
    
      // AUTOALIGn BUTTONS ARE 7 AND 8, LEFT AND RIGHT REEF BRANCH RESPECTIVELY
-     /* 
-     m_driverController.button(7).onTrue(m_swerve.driveToPose(new Pose2d()));
-     m_driverController.button(8).onTrue(m_swerve.driveToPose(new Pose2d())); 
+     
+     m_driverController.button(7).onTrue(m_swerve.driveToPose(m_vision.findRightBranch()));
+     m_driverController.button(8).onTrue(m_swerve.driveToPose(m_vision.findLeftBranch())); 
     
-    */
+    
   }
 
   /**

@@ -47,7 +47,7 @@ public class CoralCryus extends PIDSubsystem {
         m_encoder = m_pitch.getEncoder();
         m_encoder.setPosition(0);
         this.getController().disableContinuousInput();
-        m_intake = new SparkMax(67 , MotorType.kBrushless);
+        m_intake = new SparkMax(15 , MotorType.kBrushless);
         double[] defaultArray = {0.0,0.0,0.0};
         shooterInfo = NetworkTableInstance.getDefault().getDoubleArrayTopic("shooterInfo").getEntry(defaultArray, PubSubOption.keepDuplicates(true), PubSubOption.pollStorage(10));
         beamBreak = new DigitalInput(0);
