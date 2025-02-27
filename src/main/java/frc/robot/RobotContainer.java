@@ -44,15 +44,17 @@ public class RobotContainer {
   private final DriveLewis m_swerve = new DriveLewis();
   private final Vision m_vision = new Vision();
   private final CoralCryus m_shooter = new CoralCryus();
-  private final ElevatorJustin m_elevator = new ElevatorJustin();
+  //private final ElevatorJustin m_elevator = new ElevatorJustin();
+
+  
 
   
   public RobotContainer() {
-    NamedCommands.registerCommand("elevateL1", m_elevator.elevate(1));
-    NamedCommands.registerCommand("elevateL2", m_elevator.elevate(2));
-    NamedCommands.registerCommand("elevateL3", m_elevator.elevate(3));
-    NamedCommands.registerCommand("elevateL4", m_elevator.elevate(4));
-    NamedCommands.registerCommand("elevateL0", m_elevator.elevate(1)); // reload
+    // NamedCommands.registerCommand("elevateL1", m_elevator.elevate(1));
+    // NamedCommands.registerCommand("elevateL2", m_elevator.elevate(2));
+    // NamedCommands.registerCommand("elevateL3", m_elevator.elevate(3));
+    // NamedCommands.registerCommand("elevateL4", m_elevator.elevate(4));
+    // NamedCommands.registerCommand("elevateL0", m_elevator.elevate(1)); // reload
 
     NamedCommands.registerCommand("aimL1", m_shooter.aim(1)); 
     NamedCommands.registerCommand("aimL4", m_shooter.aim(2));
@@ -88,21 +90,22 @@ public class RobotContainer {
 
     m_aimJoystick.button(1).onTrue(m_shooter.shootCoral().withTimeout(0.5));
     m_aimJoystick.button(2).onTrue(m_shooter.intake().until(m_shooter.beamBreak()));
-  
-     m_aimJoystick.button(3).onTrue(m_elevator.runOnce(()->m_elevator.setSetpoint(m_elevator.getSetpoint()-(0.05))) ); //fine tune for zero routine
-     m_aimJoystick.button(4).onTrue(m_elevator.runOnce(()->m_elevator.setSetpoint(m_elevator.getSetpoint()+(0.05))) ); //fine tune for zero routine
-     m_aimJoystick.button(6).and(m_elevator.getLimit()).onTrue(m_elevator.zero()); // zero if the limit switch is also triggered
+    
+    
+    //  m_aimJoystick.button(3).onTrue(m_elevator.runOnce(()->m_elevator.setSetpoint(m_elevator.getSetpoint()-(0.05))) ); //fine tune for zero routine
+    //  m_aimJoystick.button(4).onTrue(m_elevator.runOnce(()->m_elevator.setSetpoint(m_elevator.getSetpoint()+(0.05))) ); //fine tune for zero routine
+    //  m_aimJoystick.button(6).and(m_elevator.getLimit()).onTrue(m_elevator.zero()); // zero if the limit switch is also triggered
 
-     m_aimJoystick.button(9).onTrue(Commands.parallel(m_elevator.elevate(1), m_shooter.aim(4)).andThen(m_shooter.aim(1))); // aim L1
-     m_aimJoystick.button(10).onTrue(Commands.parallel(m_elevator.elevate(2), m_shooter.aim(4)).andThen(m_shooter.aim(2))); // aim L2
-     m_aimJoystick.button(11).onTrue(Commands.parallel(m_elevator.elevate(3), m_shooter.aim(4)).andThen(m_shooter.aim(3))); // aim L3
-     m_aimJoystick.button(12).onTrue(Commands.parallel(m_elevator.elevate(4), m_shooter.aim(4)).andThen(m_shooter.aim(4))); // aim L4
-     m_aimJoystick.button(2).onTrue(Commands.parallel(m_elevator.elevate(4), m_shooter.aim(4)).andThen(m_shooter.aim(5)));
+    //  m_aimJoystick.button(9).onTrue(Commands.parallel(m_elevator.elevate(1), m_shooter.aim(4)).andThen(m_shooter.aim(1))); // aim L1
+    //  m_aimJoystick.button(10).onTrue(Commands.parallel(m_elevator.elevate(2), m_shooter.aim(4)).andThen(m_shooter.aim(2))); // aim L2
+    //  m_aimJoystick.button(11).onTrue(Commands.parallel(m_elevator.elevate(3), m_shooter.aim(4)).andThen(m_shooter.aim(3))); // aim L3
+    //  m_aimJoystick.button(12).onTrue(Commands.parallel(m_elevator.elevate(4), m_shooter.aim(4)).andThen(m_shooter.aim(4))); // aim L4
+    //  m_aimJoystick.button(2).onTrue(Commands.parallel(m_elevator.elevate(4), m_shooter.aim(4)).andThen(m_shooter.aim(5)));
    
      //AUTOALIGn BUTTONS ARE 7 AND 8, LEFT AND RIGHT REEF BRANCH RESPECTIVELY
-     
-     m_driverController.button(7).onTrue(m_swerve.driveToPose(m_vision.findRightBranch()));
-     m_driverController.button(8).onTrue(m_swerve.driveToPose(m_vision.findLeftBranch())); 
+     m_driverController.button(1).onTrue(Commands.runOnce(()->m_vision.lockIn()));
+     m_driverController.button(7).whileTrue(m_swerve.driveToPose(m_vision.findRightBranch()));
+     m_driverController.button(8).whileTrue(m_swerve.driveToPose(m_vision.findLeftBranch()));
     
     
   }
@@ -112,8 +115,8 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
-  public Command getAutonomousCommand() {
+  public Command getAutonomousCommand(String autoName) {
     // An example command will be run in autonomous
-    return new PathPlannerAuto("2xl4");
+    return new PathPlannerAuto(autoName);
   }
 }

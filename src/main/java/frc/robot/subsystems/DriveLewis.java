@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -145,8 +146,8 @@ public class DriveLewis extends SubsystemBase {
 
 
 
-        publisher3.set(findRightBranch());
-        publisher4.set(findLeftBranch());
+        // publisher3.set(findRightBranch());
+        // publisher4.set(findLeftBranch());
 
 
         // publisher.set(robotPose);
@@ -265,8 +266,8 @@ public class DriveLewis extends SubsystemBase {
             this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
             (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
                         new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-                                new PIDConstants(0.121, 0.0001, 0.01), // Translation PID constants
-                                new PIDConstants(0.008, 0.0, 0.0064) // Rotation PID constants
+                                new PIDConstants(1, 0, 0), // Translation PID constants
+                                new PIDConstants(1, 0, 0) // Rotation PID constants
                         ),
                         config, // The robot configuration
                         () -> {
@@ -286,39 +287,56 @@ public class DriveLewis extends SubsystemBase {
 
 
 
-    public Pose2d findLeftBranch(){
-    long id =  NetworkTableInstance.getDefault().getTable("limelight").getEntry("tid").getInteger(0); // get primary id
+    // public Pose2d findLeftBranch(){
+    // long id =  NetworkTableInstance.getDefault().getTable("limelight").getEntry("tid").getInteger(0); // get primary id
     
-    double x_off = Units.inchesToMeters(5);
-    double y_off = Units.inchesToMeters(9+15); //change to left offset later
+    // double x_off = Units.inchesToMeters(5);
+    // double y_off = Units.inchesToMeters(9+15); //change to left offset later
    
 
-    Pose2d goalPose = layout.getTagPose((int)id).get().toPose2d();
-    Pose2d goalPose2 = new Pose2d(goalPose.getX() + x_off*Math.cos(Math.toRadians(90+goalPose.getRotation().getDegrees()))+y_off*Math.cos(goalPose.getRotation().getRadians()),
-                                  goalPose.getY() + x_off*Math.sin(Math.toRadians(90+goalPose.getRotation().getDegrees()))+y_off*Math.sin(goalPose.getRotation().getRadians()),
-                                  new Rotation2d(Math.PI + goalPose.getRotation().getRadians())); 
+    // Pose2d goalPose = new Pose2d();
+    // try{
+    //     goalPose = layout.getTagPose((int)id).get().toPose2d();
+    //     System.out.println(id);
+    //  } 
+    //  catch(Exception NoSuchElementException){
+    //      System.out.println("what the fuck");
+    //  }
 
-    // get offset targeted pose?
-      return goalPose2; // TODO: find biggest apriltag in view, set pose to track as offset (see reef) 
+    // Pose2d goalPose2 = new Pose2d(goalPose.getX() + x_off*Math.cos(Math.toRadians(90+goalPose.getRotation().getDegrees()))+y_off*Math.cos(goalPose.getRotation().getRadians()),
+    //                               goalPose.getY() + x_off*Math.sin(Math.toRadians(90+goalPose.getRotation().getDegrees()))+y_off*Math.sin(goalPose.getRotation().getRadians()),
+    //                               new Rotation2d(Math.PI + goalPose.getRotation().getRadians())); 
 
+    // // get offset targeted pose?
+    //   return goalPose2; // TODO: find biggest apriltag in view, set pose to track as offset (see reef) 
+
+  //  }
+    public BooleanSupplier isValidTarget(){
+      return ()-> (NetworkTableInstance.getDefault().getTable("limelight").getEntry("tid").getInteger(0) != 0);
     }
-
-    public Pose2d findRightBranch(){
-      long id =  NetworkTableInstance.getDefault().getTable("limelight").getEntry("tid").getInteger(0); // get primary id
+  //   public Pose2d findRightBranch(){
+  //     long id =  NetworkTableInstance.getDefault().getTable("limelight").getEntry("tid").getInteger(0); // get primary id
     
-      double x_off = -Units.inchesToMeters(5);
-      double y_off = Units.inchesToMeters(9+15); //change to left offset later
-   
-      Pose2d goalPose = layout.getTagPose((int)id).get().toPose2d();
-      Pose2d goalPose2 = new Pose2d(goalPose.getX() + x_off*Math.cos(Math.toRadians(90+goalPose.getRotation().getDegrees()))+y_off*Math.cos(goalPose.getRotation().getRadians()),
-                                    goalPose.getY() + x_off*Math.sin(Math.toRadians(90+goalPose.getRotation().getDegrees()))+y_off*Math.sin(goalPose.getRotation().getRadians()),
-                                    new Rotation2d(Math.PI + goalPose.getRotation().getRadians())); 
+  //     double x_off = -Units.inchesToMeters(5);
+  //     double y_off = Units.inchesToMeters(9+15); //change to left offset later
+  //     Pose2d goalPose = new Pose2d();
+  //     try{
+  //         goalPose = layout.getTagPose((int)id).get().toPose2d();
+  //         System.out.println(id);
+  //      } 
+  //      catch(Exception NoSuchElementException){
+  //          System.out.println("what the fuck");
+  //      }
   
-
+  //     Pose2d goalPose2 = new Pose2d(goalPose.getX() + x_off*Math.cos(Math.toRadians(90+goalPose.getRotation().getDegrees()))+y_off*Math.cos(goalPose.getRotation().getRadians()),
+  //                                   goalPose.getY() + x_off*Math.sin(Math.toRadians(90+goalPose.getRotation().getDegrees()))+y_off*Math.sin(goalPose.getRotation().getRadians()),
+  //                                   new Rotation2d(Math.PI + goalPose.getRotation().getRadians())); 
+  
+  //  // TODO: IF NO ID AVAILABLE, THEN REFUSE TO RUN
      
-      // get offset targeted pose?
-      return goalPose2; // TODO: find biggest apriltag in view, set pose to track as offset (see reef) 
-    }
+  //     // get offset targeted pose?
+  //     return goalPose2; // TODO: find biggest apriltag in view, set pose to track as offset (see reef) 
+  //   }
     
 
    
@@ -352,10 +370,10 @@ public class DriveLewis extends SubsystemBase {
       return run(() -> {
         // Make the robot move
         swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
-            Math.pow(MathUtil.applyDeadband(translationX.getAsDouble(), 0.2),2)* swerveDrive.getMaximumChassisVelocity(),
-            Math.pow(MathUtil.applyDeadband(translationY.getAsDouble(), 0.2),2) * swerveDrive.getMaximumChassisVelocity()
+            MathUtil.applyDeadband(translationX.getAsDouble(), 0.2)* swerveDrive.getMaximumChassisVelocity(),
+            MathUtil.applyDeadband(translationY.getAsDouble(), 0.2) * swerveDrive.getMaximumChassisVelocity()
                 ),0.8),
-            Math.pow(MathUtil.applyDeadband(angularRotationX.getAsDouble(), 0.2), 2) 
+            MathUtil.applyDeadband(angularRotationX.getAsDouble(), 0.2) 
                 * swerveDrive.getMaximumChassisAngularVelocity(),
             true,
             false);

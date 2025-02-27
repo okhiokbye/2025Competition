@@ -15,17 +15,21 @@ public class Vision extends SubsystemBase{
     private final AprilTagFieldLayout layout = AprilTagFields.k2025Reefscape.loadAprilTagLayoutField();
     StructPublisher<Pose2d> publisher3 = NetworkTableInstance.getDefault().getStructTopic("lewisistheworstpersoneverNEWPOSE1", Pose2d.struct).publish();
     StructPublisher<Pose2d> publisher4 = NetworkTableInstance.getDefault().getStructTopic("lewisisnotagoodpersonNEWPOSE2", Pose2d.struct).publish();
-    public Vision(){
-        
+    
+    long lockTarget;
+    
+    public void lockIn(){
+      lockTarget=  NetworkTableInstance.getDefault().getTable("limelight").getEntry("tid").getInteger(0); // get primary id
+      
     }
-     public Pose2d findLeftBranch(){
-    long id =  NetworkTableInstance.getDefault().getTable("limelight").getEntry("tid").getInteger(17); // get primary id
+    public Pose2d findLeftBranch(){
     
     double x_off = Units.inchesToMeters(5);
     double y_off = Units.inchesToMeters(9+15); //change to left offset later
     Pose2d goalPose = new Pose2d();
     try{
-        goalPose = layout.getTagPose((int)id).get().toPose2d();
+        goalPose = layout.getTagPose((int)lockTarget).get().toPose2d();
+        System.out.println(lockTarget);
      } 
      catch(Exception NoSuchElementException){
          System.out.println("what the fuck");
@@ -41,15 +45,16 @@ public class Vision extends SubsystemBase{
 
     }
 
+    
     public Pose2d findRightBranch(){
-      long id =  NetworkTableInstance.getDefault().getTable("limelight").getEntry("tid").getInteger(17); // get primary id
     
       double x_off = -Units.inchesToMeters(5);
       double y_off = Units.inchesToMeters(9+15); //change to left offset later
     
       Pose2d goalPose = new Pose2d();
     try{
-       goalPose = layout.getTagPose((int)id).get().toPose2d();
+       goalPose = layout.getTagPose((int)lockTarget).get().toPose2d();
+       System.out.println(lockTarget);
     } 
     catch(Exception NoSuchElementException){
         System.out.println("what the fuck");

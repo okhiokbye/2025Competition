@@ -35,6 +35,7 @@ public class CoralCryus extends PIDSubsystem {
     private final SparkMax m_shoot;
     private final SparkMax m_pitch;
     private final SparkMax m_intake;
+
     private final RelativeEncoder m_encoder;
     private final DigitalInput beamBreak;
     private final DoubleArrayEntry shooterInfo;
@@ -51,6 +52,7 @@ public class CoralCryus extends PIDSubsystem {
         double[] defaultArray = {0.0,0.0,0.0};
         shooterInfo = NetworkTableInstance.getDefault().getDoubleArrayTopic("shooterInfo").getEntry(defaultArray, PubSubOption.keepDuplicates(true), PubSubOption.pollStorage(10));
         beamBreak = new DigitalInput(0);
+        
     }
     @Override
     public void useOutput(double output, double setpoint){
@@ -58,7 +60,8 @@ public class CoralCryus extends PIDSubsystem {
     }
     @Override
     public double getMeasurement(){
-        return m_encoder.getPosition();
+        return m_encoder.getPosition()*360*(1.0/125); 
+        // convert to degrees of rotation on output shaft 
     }
     //I have no clue if this is how we're supposed to code it but I based it off of shoot coral
     public Command intake() {

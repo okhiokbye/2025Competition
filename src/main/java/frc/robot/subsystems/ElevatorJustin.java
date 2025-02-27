@@ -54,7 +54,8 @@ public void useOutput(double output, double setpoint) {
 
 @Override
 public double getMeasurement() {
-  return  m_elevator1.getEncoder().getPosition();
+  return  m_elevator1.getEncoder().getPosition()*360*(1.0/189); 
+  // convert to degrees of rotation on output shaft 
 }
 
 public BooleanSupplier getLimit(){
