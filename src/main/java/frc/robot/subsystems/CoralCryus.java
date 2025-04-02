@@ -79,32 +79,25 @@ public class CoralCryus extends PIDSubsystem {
     public Command shootCoral() {
         return new StartEndCommand(
             //set motor power manually below
-            () -> m_shoot.set(-0.6),
+            () -> m_shoot.set(-1),
             () -> m_shoot.set(0)
         );
     }
+
     public BooleanSupplier beamBreak(){
         return () -> beamBreak.get();
     }
 
-    public Command aim(int position) {
-        switch (position) {
-            case 1:
-            return new RunCommand(()-> setSetpoint(5465687), this); // aim L1
-            
-            case 2:
-            return new RunCommand(()-> setSetpoint(34567), this); // aim L4
-                
-            case 3: 
-            return new RunCommand(()-> setSetpoint(345678), this); // reload position
-        
-            default:
-            return new RunCommand(()-> System.out.println("how tf u call me"));
-                
-        }
+    public Command aimUP(int position) {
+            return new RunCommand(()-> m_pitch.set(-0.5), this);
     }
-  
+    public Command aimDOWN(int position) {
+        return new RunCommand(()-> m_pitch.set(0.5), this);
+}
 
+public Command aimSTOP(int position) {
+    return new RunCommand(()-> m_pitch.set(0), this);
+}
 
     public void periodic() {
         // This method will be called once per scheduler run

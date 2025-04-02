@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "test l4 path"
+            "pathName": "middlescore"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": null
+            "name": "shoot"
           }
         }
       ]

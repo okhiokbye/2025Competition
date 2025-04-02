@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import java.io.File;
 import java.util.function.Supplier;
 
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModuleConstantsFactory;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.commands.PathfindingCommand;
@@ -56,9 +57,9 @@ public class RobotContainer {
     // NamedCommands.registerCommand("elevateL4", m_elevator.elevate(4));
     // NamedCommands.registerCommand("elevateL0", m_elevator.elevate(1)); // reload
 
-    NamedCommands.registerCommand("aimL1", m_shooter.aim(1)); 
-    NamedCommands.registerCommand("aimL4", m_shooter.aim(2));
-    NamedCommands.registerCommand("aimL0", m_shooter.aim(3)); // reload 
+    // NamedCommands.registerCommand("aimL1", m_shooter.aim(1)); 
+    // NamedCommands.registerCommand("aimL4", m_shooter.aim(2));
+    // NamedCommands.registerCommand("aimL0", m_shooter.aim(3)); // reload 
     NamedCommands.registerCommand("shoot", m_shooter.shootCoral());
     NamedCommands.registerCommand("intake", m_shooter.intake());
     // NamedCommands.registerCommand("getBeamBreak",  m_shooter.beamBreak()); figure out what pathplanner needs for intake stopping later - or maybe it doesnt matter
@@ -88,11 +89,12 @@ public class RobotContainer {
        ()->-m_driverController.getRawAxis(2)
      ));
 
-    m_aimJoystick.button(1).onTrue(m_shooter.shootCoral().withTimeout(0.5));
-    m_aimJoystick.button(2).onTrue(m_shooter.intake().until(m_shooter.beamBreak()));
-    
-    
-    //  m_aimJoystick.button(3).onTrue(m_elevator.runOnce(()->m_elevator.setSetpoint(m_elevator.getSetpoint()-(0.05))) ); //fine tune for zero routine
+    m_aimJoystick.button(1).onTrue(m_shooter.shootCoral().withTimeout(2));
+   
+    m_aimJoystick.button(2).onTrue(m_shooter.intake().withTimeout(2));
+    m_aimJoystick.button(7).onTrue(m_shooter.aimUP(69));
+    m_aimJoystick.button(8).onTrue(m_shooter.aimDOWN(69));
+        //  m_aimJoystick.button(3).onTrue(m_elevator.runOnce(()->m_elevator.setSetpoint(m_elevator.getSetpoint()-(0.05))) ); //fine tune for zero routine
     //  m_aimJoystick.button(4).onTrue(m_elevator.runOnce(()->m_elevator.setSetpoint(m_elevator.getSetpoint()+(0.05))) ); //fine tune for zero routine
     //  m_aimJoystick.button(6).and(m_elevator.getLimit()).onTrue(m_elevator.zero()); // zero if the limit switch is also triggered
 
@@ -106,6 +108,7 @@ public class RobotContainer {
      m_driverController.button(1).onTrue(Commands.runOnce(()->m_vision.lockIn()));
      m_driverController.button(7).whileTrue(m_swerve.driveToPose(m_vision.findRightBranch()));
      m_driverController.button(8).whileTrue(m_swerve.driveToPose(m_vision.findLeftBranch()));
+     m_driverController.button(3).onTrue(m_swerve.zeroGyroCommand());
     
     
   }
@@ -115,8 +118,8 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
-  public Command getAutonomousCommand(String autoName) {
+  public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return new PathPlannerAuto(autoName);
+    return new PathPlannerAuto("ballin");
   }
 }

@@ -32,7 +32,7 @@ public class Vision extends SubsystemBase{
         System.out.println(lockTarget);
      } 
      catch(Exception NoSuchElementException){
-         System.out.println("what the fuck");
+        // System.out.println("what the fuck");
      }
 
    
@@ -57,7 +57,7 @@ public class Vision extends SubsystemBase{
        System.out.println(lockTarget);
     } 
     catch(Exception NoSuchElementException){
-        System.out.println("what the fuck");
+        //System.out.println("what the fuck");
     }
       Pose2d goalPose2 = new Pose2d(goalPose.getX() + x_off*Math.cos(Math.toRadians(90+goalPose.getRotation().getDegrees()))+y_off*Math.cos(goalPose.getRotation().getRadians()),
                                     goalPose.getY() + x_off*Math.sin(Math.toRadians(90+goalPose.getRotation().getDegrees()))+y_off*Math.sin(goalPose.getRotation().getRadians()),

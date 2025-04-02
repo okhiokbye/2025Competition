@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
@@ -34,9 +35,11 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 import frc.robot.LimelightHelpers.LimelightResults;
@@ -76,10 +79,9 @@ public class DriveLewis extends SubsystemBase {
         swerveDrive.setAutoCenteringModules(false);
         swerveDrive.zeroGyro();
         //swerveDrive.getGyro().setOffset(new Rotation3d(0,0,Math.PI));
-        
-        poseEstimator = swerveDrive.swerveDrivePoseEstimator;
-        var alliance = DriverStation.getAlliance();
-        boolean rorb = alliance.get() == DriverStation.Alliance.Red;
+       
+        Optional<Alliance> alliance = DriverStation.getAlliance();
+        boolean rorb = alliance.orElse(Alliance.Red) == DriverStation.Alliance.Red;
 
         if (rorb){
           LimelightHelpers.setCameraPose_RobotSpace("limelight", .355, 0.0127, 0.0762, 0, 0, 0);
@@ -96,9 +98,8 @@ public class DriveLewis extends SubsystemBase {
     
     public void periodic() {
 
-        poseEstimator.update(swerveDrive.getYaw(), getModulePositions());
-        LimelightHelpers.SetRobotOrientation("limelight", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
-        
+        //poseEstimator.update(swerveDrive.getYaw(), getModulePositions());
+        LimelightHelpers.SetRobotOrientation("limelight", getPose().getRotation().getDegrees(), 0, 0, 0, 0, 0);
 
     //     LimelightHelpers.PoseEstimate botposeMT2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
 
@@ -247,7 +248,9 @@ public class DriveLewis extends SubsystemBase {
         mapvelo.get("frontright").getState(), 
         mapvelo.get("backleft").getState());
   }
-
+  public Command zeroGyroCommand(){
+    return Commands.runOnce( ()-> swerveDrive.zeroGyro());
+  }
 
     public void configureAutoBuilder(){
     RobotConfig config = null;
@@ -257,7 +260,7 @@ public class DriveLewis extends SubsystemBase {
       // Handle exception as needed
       e.printStackTrace();
     }
-
+    
 
     // Configure AutoBuilder last
     AutoBuilder.configure(
